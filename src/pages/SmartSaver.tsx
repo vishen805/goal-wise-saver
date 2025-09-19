@@ -6,28 +6,68 @@ import ExpensesScreen from '@/components/expenses/ExpensesScreen';
 import BudgetScreen from '@/components/budget/BudgetScreen';
 import SettingsScreen from '@/components/settings/SettingsScreen';
 
+type NavigationState = {
+  tab: string;
+  showBack: boolean;
+  title?: string;
+};
+
 export default function SmartSaver() {
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [navState, setNavState] = useState<NavigationState>({
+    tab: 'dashboard',
+    showBack: false,
+    title: undefined
+  });
+
+  const handleTabChange = (tab: string) => {
+    setNavState({
+      tab,
+      showBack: false,
+      title: undefined
+    });
+  };
+
+  const handleNavigateWithBack = (tab: string, title?: string) => {
+    setNavState({
+      tab,
+      showBack: true,
+      title
+    });
+  };
+
+  const handleBackClick = () => {
+    setNavState({
+      tab: 'dashboard',
+      showBack: false,
+      title: undefined
+    });
+  };
 
   const renderScreen = () => {
-    switch (currentTab) {
+    switch (navState.tab) {
       case 'dashboard':
-        return <DashboardScreen onNavigate={setCurrentTab} />;
+        return <DashboardScreen onNavigate={handleNavigateWithBack} />;
       case 'goals':
-        return <GoalsScreen />;
+        return <GoalsScreen onNavigate={handleNavigateWithBack} />;
       case 'expenses':
-        return <ExpensesScreen />;
+        return <ExpensesScreen onNavigate={handleNavigateWithBack} />;
       case 'budget':
-        return <BudgetScreen />;
+        return <BudgetScreen onNavigate={handleNavigateWithBack} />;
       case 'settings':
-        return <SettingsScreen />;
+        return <SettingsScreen onNavigate={handleNavigateWithBack} />;
       default:
-        return <DashboardScreen onNavigate={setCurrentTab} />;
+        return <DashboardScreen onNavigate={handleNavigateWithBack} />;
     }
   };
 
   return (
-    <MobileLayout currentTab={currentTab} onTabChange={setCurrentTab}>
+    <MobileLayout 
+      currentTab={navState.tab} 
+      onTabChange={handleTabChange}
+      showBackButton={navState.showBack}
+      onBackClick={handleBackClick}
+      title={navState.title}
+    >
       {renderScreen()}
     </MobileLayout>
   );

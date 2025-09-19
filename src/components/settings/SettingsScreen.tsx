@@ -19,7 +19,11 @@ import {
 import { dataStorage, savingsGoalsStorage, expensesStorage, budgetsStorage } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 
-export default function SettingsScreen() {
+interface SettingsScreenProps {
+  onNavigate?: (tab: string, title?: string) => void;
+}
+
+export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
   const [isDarkMode, setIsDarkMode] = useState(
     document.documentElement.classList.contains('dark')
   );
@@ -101,8 +105,8 @@ export default function SettingsScreen() {
   return (
     <div className="p-4 space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Settings</h2>
-        <p className="text-muted-foreground">Customize your SmartSaver experience</p>
+        <h2 className="text-xl sm:text-2xl font-bold">Settings</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">Customize your SmartSaver experience</p>
       </div>
 
       {/* Appearance */}

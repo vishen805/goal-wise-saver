@@ -224,6 +224,27 @@
     animation: success-pulse 2s infinite;
   }
   
+  /* Mobile optimization */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .safe-area-padding-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Better touch targets */
+  button, .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smooth scrolling for mobile */
+  .smooth-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
   @keyframes success-pulse {
     0%, 100% {
       opacity: 1;

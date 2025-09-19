@@ -12,7 +12,11 @@ import { formatCurrency, formatDate, getCategoryIcon, getProgressColor } from '@
 import { SavingsGoal } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
 
-export default function GoalsScreen() {
+interface GoalsScreenProps {
+  onNavigate?: (tab: string, title?: string) => void;
+}
+
+export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
@@ -164,8 +168,8 @@ export default function GoalsScreen() {
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Savings Goals</h2>
-          <p className="text-muted-foreground">Track your financial milestones</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Savings Goals</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Track your financial milestones</p>
         </div>
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>

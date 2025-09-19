@@ -12,7 +12,11 @@ import { formatCurrency, getCategoryIcon } from '@/lib/categories';
 import { Budget, ExpenseCategory } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
 
-export default function BudgetScreen() {
+interface BudgetScreenProps {
+  onNavigate?: (tab: string, title?: string) => void;
+}
+
+export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { toast } = useToast();

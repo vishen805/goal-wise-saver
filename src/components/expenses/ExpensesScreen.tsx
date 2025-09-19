@@ -11,7 +11,11 @@ import { formatCurrency, formatDate, getCategoryIcon } from '@/lib/categories';
 import { Expense, ExpenseCategory } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
 
-export default function ExpensesScreen() {
+interface ExpensesScreenProps {
+  onNavigate?: (tab: string, title?: string) => void;
+}
+
+export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [filterCategory, setFilterCategory] = useState<ExpenseCategory | 'all'>('all');
@@ -137,8 +141,8 @@ export default function ExpensesScreen() {
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Expense Tracking</h2>
-          <p className="text-muted-foreground">Monitor your spending patterns</p>
+          <h2 className="text-xl sm:text-2xl font-bold">Expense Tracking</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">Monitor your spending patterns</p>
         </div>
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -156,25 +160,25 @@ export default function ExpensesScreen() {
         </Dialog>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-4">
+          {/* Summary Cards */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <Card className="financial-card gradient-secondary text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/80 text-sm">This Month</p>
-              <p className="text-2xl font-bold">{formatCurrency(currentMonthExpenses)}</p>
+              <p className="text-white/80 text-xs sm:text-sm">This Month</p>
+              <p className="text-lg sm:text-2xl font-bold break-all">{formatCurrency(currentMonthExpenses)}</p>
             </div>
-            <Calendar className="w-8 h-8 text-white/80" />
+            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-white/80 flex-shrink-0" />
           </div>
         </Card>
         
         <Card className="financial-card gradient-accent text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/80 text-sm">Total Filtered</p>
-              <p className="text-2xl font-bold">{formatCurrency(totalExpenses)}</p>
+              <p className="text-white/80 text-xs sm:text-sm">Total Filtered</p>
+              <p className="text-lg sm:text-2xl font-bold break-all">{formatCurrency(totalExpenses)}</p>
             </div>
-            <CreditCard className="w-8 h-8 text-white/80" />
+            <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white/80 flex-shrink-0" />
           </div>
         </Card>
       </div>
