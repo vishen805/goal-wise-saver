@@ -2,41 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* SmartSaver Design System - Financial App Theme */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Core colors - Financial green/blue theme */
+    --background: 248 250 252;
+    --foreground: 215 28% 17%;
+    
+    /* Cards and surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 215 28% 17%;
+    --card-hover: 220 14% 96%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
+    --popover-foreground: 215 28% 17%;
+    
+    /* Primary - Success Green for savings */
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 142 69% 58%;
+    --primary-glow: 142 76% 36%;
+    
+    /* Secondary - Professional Blue */
+    --secondary: 213 94% 68%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 213 94% 78%;
+    
+    /* Accent - Warning Orange for budgets */
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 38 100% 70%;
+    
+    /* Muted tones */
+    --muted: 220 14% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
+    
+    /* Destructive - Error Red */
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Borders and inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 142 76% 36%;
+    
+    /* Financial colors */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --expense: 0 84.2% 60.2%;
+    --expense-foreground: 0 0% 100%;
+    --income: 142 76% 36%;
+    --income-foreground: 0 0% 100%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 69% 58%));
+    --gradient-secondary: linear-gradient(135deg, hsl(213 94% 68%), hsl(213 94% 78%));
+    --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%), hsl(38 100% 70%));
+    --gradient-surface: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 14% 98%));
+    --gradient-hero: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(213 94% 68%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+    --shadow-glow: 0 0 20px hsl(142 76% 36% / 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    --radius: 12px;
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,33 +94,61 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* Dark mode - Financial app friendly */
+    --background: 222 47% 11%;
     --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
+    
+    --card: 224 71% 4%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
+    --card-hover: 215 28% 17%;
+    
+    --popover: 224 71% 4%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
+    
+    /* Primary - Success Green (adjusted for dark) */
+    --primary: 142 69% 58%;
+    --primary-foreground: 215 28% 17%;
+    --primary-light: 142 76% 36%;
+    --primary-glow: 142 69% 58%;
+    
+    /* Secondary - Professional Blue (adjusted) */
+    --secondary: 213 94% 78%;
+    --secondary-foreground: 215 28% 17%;
+    --secondary-light: 213 94% 68%;
+    
+    /* Accent - Warning Orange (adjusted) */
+    --accent: 38 100% 70%;
+    --accent-foreground: 215 28% 17%;
+    --accent-light: 38 92% 50%;
+    
+    --muted: 215 28% 17%;
+    --muted-foreground: 217.9 10.6% 64.9%;
+    
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 142 69% 58%;
+    
+    /* Financial colors - dark mode */
+    --success: 142 69% 58%;
+    --success-foreground: 215 28% 17%;
+    --warning: 38 100% 70%;
+    --warning-foreground: 215 28% 17%;
+    --expense: 0 84.2% 60.2%;
+    --expense-foreground: 210 40% 98%;
+    --income: 142 69% 58%;
+    --income-foreground: 215 28% 17%;
+    
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(142 69% 58%), hsl(142 76% 36%));
+    --gradient-secondary: linear-gradient(135deg, hsl(213 94% 78%), hsl(213 94% 68%));
+    --gradient-accent: linear-gradient(135deg, hsl(38 100% 70%), hsl(38 92% 50%));
+    --gradient-surface: linear-gradient(145deg, hsl(224 71% 4%), hsl(215 28% 17%));
+    --gradient-hero: linear-gradient(135deg, hsl(142 69% 58%) 0%, hsl(213 94% 78%) 100%);
+    
+    --shadow-glow: 0 0 20px hsl(142 69% 58% / 0.4);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -100,6 +166,72 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Financial card animations */
+  .financial-card {
+    @apply bg-card border border-border rounded-xl p-4 transition-all duration-300 hover:shadow-lg hover:bg-card-hover;
+  }
+  
+  .financial-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Gradient backgrounds */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  /* Glassmorphism effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Progress animations */
+  .progress-animate {
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Mobile-first responsive text */
+  .text-responsive {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+  }
+  
+  /* Success pulse animation */
+  .success-pulse {
+    animation: success-pulse 2s infinite;
+  }
+  
+  @keyframes success-pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
   }
 }
