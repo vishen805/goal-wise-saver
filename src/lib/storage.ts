@@ -1,10 +1,15 @@
-import { SavingsGoal, Expense, Budget } from '@/types/financial';
+import { SavingsGoal, Expense, Budget, Badge, UserStreak, Challenge, SavingActivity, Tip } from '@/types/financial';
 
 const STORAGE_KEYS = {
   SAVINGS_GOALS: 'smartsaver_savings_goals',
   EXPENSES: 'smartsaver_expenses', 
   BUDGETS: 'smartsaver_budgets',
   SETTINGS: 'smartsaver_settings',
+  BADGES: 'smartsaver_badges',
+  STREAKS: 'smartsaver_streaks',
+  CHALLENGES: 'smartsaver_challenges',
+  SAVING_ACTIVITIES: 'smartsaver_saving_activities',
+  TIPS: 'smartsaver_tips',
 } as const;
 
 // Savings Goals Storage
@@ -124,6 +129,10 @@ export const dataStorage = {
           if (data.savingsGoals) savingsGoalsStorage.set(data.savingsGoals);
           if (data.expenses) expensesStorage.set(data.expenses);
           if (data.budgets) budgetsStorage.set(data.budgets);
+          if (data.badges) badgesStorage.set(data.badges);
+          if (data.streaks) streaksStorage.set(data.streaks);
+          if (data.challenges) challengesStorage.set(data.challenges);
+          if (data.savingActivities) savingActivitiesStorage.set(data.savingActivities);
           
           resolve();
         } catch (error) {
@@ -134,5 +143,123 @@ export const dataStorage = {
       reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsText(file);
     });
+  }
+};
+
+// Badges Storage
+export const badgesStorage = {
+  get: (): Badge[] => {
+    const stored = localStorage.getItem(STORAGE_KEYS.BADGES);
+    return stored ? JSON.parse(stored) : [];
+  },
+  
+  set: (badges: Badge[]): void => {
+    localStorage.setItem(STORAGE_KEYS.BADGES, JSON.stringify(badges));
+  },
+  
+  add: (badge: Badge): void => {
+    const badges = badgesStorage.get();
+    if (!badges.find(b => b.id === badge.id)) {
+      badges.push(badge);
+      badgesStorage.set(badges);
+    }
+  },
+  
+  getByCategory: (category: Badge['category']): Badge[] => {
+    return badgesStorage.get().filter(b => b.category === category);
+  }
+};
+
+// Streaks Storage
+export const streaksStorage = {
+  get: (): UserStreak => {
+    const stored = localStorage.getItem(STORAGE_KEYS.STREAKS);
+    return stored ? JSON.parse(stored) : {
+      userId: 'default',
+      currentStreak: 0,
+      longestStreak: 0,
+      lastSavingDay: '',
+      streakHistory: []
+    };
+  },
+  
+  set: (streak: UserStreak): void => {
+    localStorage.setItem(STORAGE_KEYS.STREAKS, JSON.stringify(streak));
+  },
+  
+  update: (updates: Partial<UserStreak>): void => {
+    const streak = streaksStorage.get();
+    streaksStorage.set({ ...streak, ...updates });
+  }
+};
+
+// Challenges Storage
+export const challengesStorage = {
+  get: (): Challenge[] => {
+    const stored = localStorage.getItem(STORAGE_KEYS.CHALLENGES);
+    return stored ? JSON.parse(stored) : [];
+  },
+  
+  set: (challenges: Challenge[]): void => {
+    localStorage.setItem(STORAGE_KEYS.CHALLENGES, JSON.stringify(challenges));
+  },
+  
+  add: (challenge: Challenge): void => {
+    const challenges = challengesStorage.get();
+    challenges.push(challenge);
+    challengesStorage.set(challenges);
+  },
+  
+  update: (id: string, updates: Partial<Challenge>): void => {
+    const challenges = challengesStorage.get();
+    const index = challenges.findIndex(c => c.id === id);
+    if (index !== -1) {
+      challenges[index] = { ...challenges[index], ...updates };
+      challengesStorage.set(challenges);
+    }
+  },
+  
+  getActive: (): Challenge[] => {
+    return challengesStorage.get().filter(c => c.status === 'active');
+  }
+};
+
+// Saving Activities Storage
+export const savingActivitiesStorage = {
+  get: (): SavingActivity[] => {
+    const stored = localStorage.getItem(STORAGE_KEYS.SAVING_ACTIVITIES);
+    return stored ? JSON.parse(stored) : [];
+  },
+  
+  set: (activities: SavingActivity[]): void => {
+    localStorage.setItem(STORAGE_KEYS.SAVING_ACTIVITIES, JSON.stringify(activities));
+  },
+  
+  add: (activity: SavingActivity): void => {
+    const activities = savingActivitiesStorage.get();
+    activities.unshift(activity);
+    savingActivitiesStorage.set(activities);
+  },
+  
+  getByDateRange: (startDate: string, endDate: string): SavingActivity[] => {
+    return savingActivitiesStorage.get().filter(a => 
+      a.date >= startDate && a.date <= endDate
+    );
+  }
+};
+
+// Tips Storage
+export const tipsStorage = {
+  get: (): Tip[] => {
+    const stored = localStorage.getItem(STORAGE_KEYS.TIPS);
+    return stored ? JSON.parse(stored) : [];
+  },
+  
+  set: (tips: Tip[]): void => {
+    localStorage.setItem(STORAGE_KEYS.TIPS, JSON.stringify(tips));
+  },
+  
+  update: (tips: Tip[]): void => {
+    tipsStorage.set(tips);
   }
 };

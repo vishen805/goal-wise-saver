@@ -48,3 +48,55 @@ export interface CategoryIcon {
   icon: string;
   color: string;
 }
+
+// New types for enhanced features
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'streak' | 'savings' | 'budget' | 'achievement';
+  earnedAt: string;
+  requirement: number; // e.g., 7 for 7-day streak
+}
+
+export interface UserStreak {
+  userId: string;
+  currentStreak: number;
+  longestStreak: number;
+  lastSavingDay: string;
+  streakHistory: string[]; // dates of saving days
+}
+
+export interface Challenge {
+  id: string;
+  name: string;
+  description: string;
+  type: 'no-spend-weekend' | 'reduce-category' | 'save-amount' | 'expense-limit';
+  category?: ExpenseCategory;
+  targetAmount?: number;
+  targetReduction?: number; // percentage for reduce-category
+  startDate: string;
+  endDate: string;
+  status: 'active' | 'completed' | 'failed' | 'expired';
+  progress: number; // 0-100
+  createdAt: string;
+}
+
+export interface Tip {
+  id: string;
+  text: string;
+  impactYearly: number;
+  confidenceScore: number; // 0-1
+  relatedCategory: ExpenseCategory;
+  actionType: 'reduce-spending' | 'increase-savings' | 'budget-optimization';
+  suggestedReduction: number; // monthly amount
+}
+
+export interface SavingActivity {
+  id: string;
+  date: string;
+  netSavings: number; // positive = saved money, negative = spent savings
+  isManualSavingDay: boolean; // user marked as saving day even if netSavings <= 0
+  goalContributions: Array<{ goalId: string; amount: number }>;
+}
