@@ -14,8 +14,11 @@ import {
   Shield, 
   Database,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  HelpCircle,
+  BookOpen
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { dataStorage, savingsGoalsStorage, expensesStorage, budgetsStorage } from '@/lib/storage';
 import { useToast } from '@/hooks/use-toast';
 
@@ -24,6 +27,7 @@ interface SettingsScreenProps {
 }
 
 export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
+  const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(
     document.documentElement.classList.contains('dark')
   );
@@ -292,6 +296,33 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
                 </div>
               </DialogContent>
             </Dialog>
+          </div>
+        </div>
+      </Card>
+
+      {/* Help & Support */}
+      <Card className="financial-card">
+        <div className="space-y-4">
+          <h3 className="font-semibold flex items-center gap-2">
+            <HelpCircle className="w-5 h-5" />
+            Help & Support
+          </h3>
+          
+          <div className="space-y-3">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/how-to-use')}
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              How to Use Smart Saver
+            </Button>
+            
+            <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="text-sm text-muted-foreground">
+                💡 New to Smart Saver? Check out our complete guide to get started with tracking expenses, setting goals, and building better financial habits.
+              </p>
+            </div>
           </div>
         </div>
       </Card>
