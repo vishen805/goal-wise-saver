@@ -5,6 +5,7 @@ import GoalsScreen from '@/components/goals/GoalsScreen';
 import ExpensesScreen from '@/components/expenses/ExpensesScreen';
 import BudgetScreen from '@/components/budget/BudgetScreen';
 import SettingsScreen from '@/components/settings/SettingsScreen';
+import AIAdvisorScreen from '@/components/ai/AIAdvisorScreen';
 
 type NavigationState = {
   tab: string;
@@ -53,6 +54,8 @@ export default function SmartSaver() {
         return <ExpensesScreen onNavigate={handleNavigateWithBack} />;
       case 'budget':
         return <BudgetScreen onNavigate={handleNavigateWithBack} />;
+      case 'ai-advisor':
+        return <AIAdvisorScreen onNavigate={handleNavigateWithBack} />;
       case 'settings':
         return <SettingsScreen onNavigate={handleNavigateWithBack} />;
       default:

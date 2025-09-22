@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { Home, Target, CreditCard, PieChart, Settings, ArrowLeft } from 'lucide-react';
+import { Home, Target, CreditCard, PieChart, Settings, ArrowLeft, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -17,6 +17,7 @@ const tabs = [
   { id: 'goals', label: 'Goals', icon: Target },
   { id: 'expenses', label: 'Expenses', icon: CreditCard },
   { id: 'budget', label: 'Budget', icon: PieChart },
+  { id: 'ai-advisor', label: 'AI', icon: Bot },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -64,7 +65,7 @@ export default function MobileLayout({
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border shadow-lg safe-area-padding-bottom">
-        <div className="grid grid-cols-5 gap-0">
+        <div className="grid grid-cols-6 gap-0">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = currentTab === tab.id;
