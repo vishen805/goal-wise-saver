@@ -1,16 +1,17 @@
-import { SavingsGoal, Expense, Budget, Badge, UserStreak, Challenge, SavingActivity, Tip } from '@/types/financial';
+import { SavingsGoal, Expense, Budget, Badge, UserStreak, Challenge, SavingActivity, Tip, MonthlyIncome, AIAdvice } from '@/types/financial';
 
 const STORAGE_KEYS = {
-  SAVINGS_GOALS: 'smartsaver_savings_goals',
-  EXPENSES: 'smartsaver_expenses', 
-  BUDGETS: 'smartsaver_budgets',
-  SETTINGS: 'smartsaver_settings',
-  BADGES: 'smartsaver_badges',
-  STREAKS: 'smartsaver_streaks',
-  CHALLENGES: 'smartsaver_challenges',
-  SAVING_ACTIVITIES: 'smartsaver_saving_activities',
-  TIPS: 'smartsaver_tips',
-} as const;
+  SAVINGS_GOALS: 'smartsaver-goals',
+  EXPENSES: 'smartsaver-expenses',
+  BUDGETS: 'smartsaver-budgets',
+  BADGES: 'smartsaver-badges',
+  STREAKS: 'smartsaver-streaks',
+  CHALLENGES: 'smartsaver-challenges',
+  SAVING_ACTIVITIES: 'smartsaver-activities',
+  TIPS: 'smartsaver-tips',
+  INCOME: 'smartsaver-income',
+  AI_ADVICE: 'smartsaver-ai-advice'
+};
 
 // Savings Goals Storage
 export const savingsGoalsStorage = {
@@ -248,18 +249,89 @@ export const savingActivitiesStorage = {
   }
 };
 
-// Tips Storage
+// Tips storage
 export const tipsStorage = {
-  get: (): Tip[] => {
+  get(): Tip[] {
     const stored = localStorage.getItem(STORAGE_KEYS.TIPS);
     return stored ? JSON.parse(stored) : [];
   },
   
-  set: (tips: Tip[]): void => {
+  set(tips: Tip[]): void {
     localStorage.setItem(STORAGE_KEYS.TIPS, JSON.stringify(tips));
   },
   
-  update: (tips: Tip[]): void => {
-    tipsStorage.set(tips);
+  update(tips: Tip[]): void {
+    this.set(tips);
+  }
+};
+
+// Income storage
+export const incomeStorage = {
+  get(): MonthlyIncome[] {
+    const stored = localStorage.getItem(STORAGE_KEYS.INCOME);
+    return stored ? JSON.parse(stored) : [];
+  },
+
+  set(income: MonthlyIncome[]): void {
+    localStorage.setItem(STORAGE_KEYS.INCOME, JSON.stringify(income));
+  },
+
+  add(income: MonthlyIncome): void {
+    const current = this.get();
+    current.push(income);
+    this.set(current);
+  },
+
+  update(id: string, updates: Partial<MonthlyIncome>): void {
+    const current = this.get();
+    const index = current.findIndex(i => i.id === id);
+    if (index !== -1) {
+      current[index] = { ...current[index], ...updates };
+      this.set(current);
+    }
+  },
+
+  delete(id: string): void {
+    const current = this.get();
+    const filtered = current.filter(i => i.id !== id);
+    this.set(filtered);
+  },
+
+  getCurrentMonthIncome(): number {
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const current = this.get();
+    return current
+      .filter(i => i.month === currentMonth)
+      .reduce((sum, i) => sum + i.amount, 0);
+  }
+};
+
+// AI Advice storage
+export const aiAdviceStorage = {
+  get(): AIAdvice[] {
+    const stored = localStorage.getItem(STORAGE_KEYS.AI_ADVICE);
+    return stored ? JSON.parse(stored) : [];
+  },
+
+  set(advice: AIAdvice[]): void {
+    localStorage.setItem(STORAGE_KEYS.AI_ADVICE, JSON.stringify(advice));
+  },
+
+  add(advice: AIAdvice): void {
+    const current = this.get();
+    current.unshift(advice); // Add to beginning
+    // Keep only latest 10 pieces of advice
+    if (current.length > 10) {
+      current.splice(10);
+    }
+    this.set(current);
+  },
+
+  clear(): void {
+    this.set([]);
+  },
+
+  getLatest(limit = 3): AIAdvice[] {
+    return this.get().slice(0, limit);
   }
 };

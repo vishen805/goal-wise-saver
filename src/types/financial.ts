@@ -35,12 +35,38 @@ export type ExpenseCategory =
   | 'education'
   | 'other';
 
+export interface MonthlyIncome {
+  id: string;
+  amount: number;
+  source: string;
+  month: string; // YYYY-MM format
+  isRecurring: boolean;
+  createdAt: string;
+}
+
 export interface FinancialSummary {
   totalSavings: number;
   totalExpenses: number;
   monthlyBudget: number;
   budgetRemaining: number;
   savingsGoalsProgress: number;
+  monthlyIncome: number;
+}
+
+export interface AIAdvice {
+  id: string;
+  type: 'spending-reduction' | 'goal-timeline' | 'budget-optimization' | 'category-analysis';
+  title: string;
+  message: string;
+  impact: {
+    monthlySavings: number;
+    yearlySavings: number;
+    goalTimeReduction?: number; // months saved
+  };
+  priority: 'high' | 'medium' | 'low';
+  actionItems: string[];
+  relatedCategory?: ExpenseCategory;
+  createdAt: string;
 }
 
 export interface CategoryIcon {

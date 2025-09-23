@@ -3,9 +3,12 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, Target, DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
-import { savingsGoalsStorage, expensesStorage, budgetsStorage } from '@/lib/storage';
+import { savingsGoalsStorage, expensesStorage, budgetsStorage, incomeStorage } from '@/lib/storage';
 import { formatCurrency, getProgressColor } from '@/lib/categories';
 import { SavingsGoal, Expense, Budget, FinancialSummary } from '@/types/financial';
+import { AIAdviceCard } from '@/components/ai/AIAdviceCard';
+import { IncomeInput } from '@/components/income/IncomeInput';
+import { EnhancedAIAdvisorService } from '@/services/enhancedAIAdvisorService';
 
 interface DashboardScreenProps {
   onNavigate: (tab: string) => void;
@@ -18,18 +21,22 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
     monthlyBudget: 0,
     budgetRemaining: 0,
     savingsGoalsProgress: 0,
+    monthlyIncome: 0,
   });
   const [recentExpenses, setRecentExpenses] = useState<Expense[]>([]);
   const [activeGoals, setActiveGoals] = useState<SavingsGoal[]>([]);
+  const [aiAdvice, setAiAdvice] = useState([]);
 
   useEffect(() => {
     loadDashboardData();
+    loadAIAdvice();
   }, []);
 
   const loadDashboardData = () => {
     const goals = savingsGoalsStorage.get();
     const expenses = expensesStorage.get();
     const budgets = budgetsStorage.get();
+    const monthlyIncome = incomeStorage.getCurrentMonthIncome();
     
     const currentMonth = new Date().toISOString().slice(0, 7);
     const currentMonthExpenses = expenses.filter(e => 
@@ -52,10 +59,34 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
       monthlyBudget,
       budgetRemaining: monthlyBudget - totalExpenses,
       savingsGoalsProgress,
+      monthlyIncome,
     });
     
     setRecentExpenses(expenses.slice(0, 5));
     setActiveGoals(goals.slice(0, 3));
+  };
+
+  const loadAIAdvice = async () => {
+    try {
+      const advice = await EnhancedAIAdvisorService.generateAdvice();
+      setAiAdvice(advice);
+    } catch (error) {
+      console.error('Failed to load AI advice:', error);
+    }
+  };
+
+  const handleRefreshAdvice = async () => {
+    try {
+      const advice = await EnhancedAIAdvisorService.generateAdvice(true);
+      setAiAdvice(advice);
+    } catch (error) {
+      console.error('Failed to refresh AI advice:', error);
+    }
+  };
+
+  const handleViewAdviceDetails = (advice) => {
+    // Navigate to detailed AI advisor view
+    onNavigate('ai');
   };
 
   const quickTips = [
@@ -74,6 +105,16 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
         </h2>
         <p className="text-muted-foreground">Here's your financial overview</p>
       </div>
+
+      {/* Income Input */}
+      <IncomeInput onIncomeUpdate={loadDashboardData} />
+
+      {/* AI Advice Card */}
+      <AIAdviceCard 
+        advice={aiAdvice}
+        onRefresh={handleRefreshAdvice}
+        onViewDetails={handleViewAdviceDetails}
+      />
 
       {/* Key Metrics */}
       <div className="grid grid-cols-2 gap-4">
