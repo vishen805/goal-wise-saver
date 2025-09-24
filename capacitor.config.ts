@@ -12,10 +12,16 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 2000,
       backgroundColor: '#1e293b',
-      showSpinner: false
+      showSpinner: false,
+      androidSplashResourceName: 'splash',
+      androidScaleType: 'CENTER_CROP',
+      splashFullScreen: true,
+      splashImmersive: true
     },
     StatusBar: {
-      style: 'dark'
+      style: 'dark',
+      backgroundColor: '#1e293b',
+      overlaysWebView: false
     },
     Keyboard: {
       resize: 'body',
@@ -25,7 +31,18 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     scrollEnabled: true,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#ffffff',
+    allowsLinkPreview: false,
+    handleApplicationURL: false,
+    webViewPreferences: {
+      allowsInlineMediaPlayback: true,
+      suppressesIncrementalRendering: false
+    }
+  },
+  android: {
+    allowMixedContent: true,
+    backgroundColor: '#1e293b',
+    webContentsDebuggingEnabled: true
   }
 };
 
