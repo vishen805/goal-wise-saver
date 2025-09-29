@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.7ad25731c88e48038eaef7bcc8f36510',
+  appId: 'app.vishen.goalsaver',
   appName: 'goal-wise-saver',
   webDir: 'dist',
   server: {
