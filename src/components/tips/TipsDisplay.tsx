@@ -55,7 +55,7 @@ const getActionVariant = (actionType: Tip['actionType']) => {
  */
 const getConfidenceInfo = (score: number) => {
   if (score >= 0.8) return { label: 'High', color: 'text-green-600', icon: '🎯' };
-  if (score >= 0.6) return { label: 'Medium', color: 'text-yellow-600', icon: '⚡' };
+  if (score >= 0.6) return { label: 'Medium', color: 'text-orange-600', icon: '⚡' };
   return { label: 'Low', color: 'text-red-600', icon: '💡' };
 };
 

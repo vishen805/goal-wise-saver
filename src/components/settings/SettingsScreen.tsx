@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -28,12 +28,25 @@ interface SettingsScreenProps {
 
 export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
   const navigate = useNavigate();
-  const [isDarkMode, setIsDarkMode] = useState(
-    document.documentElement.classList.contains('dark')
-  );
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
+  const showThemeToggle = true;
+
+  // initialize theme on mount to respect saved preference or system preference
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const enabled = saved === 'dark' || (!saved && prefersDark);
+      setIsDarkMode(enabled);
+      if (enabled) document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
   const handleToggleDarkMode = (enabled: boolean) => {
     setIsDarkMode(enabled);
@@ -113,31 +126,33 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         <p className="text-sm sm:text-base text-muted-foreground">Customize your SmartSaver experience</p>
       </div>
 
-      {/* Appearance */}
-      <Card className="financial-card">
-        <div className="space-y-4">
-          <h3 className="font-semibold flex items-center gap-2">
-            {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-            Appearance
-          </h3>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="dark-mode" className="text-sm font-medium">
-                Dark Mode
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Switch between light and dark themes
-              </p>
+      {/* Appearance (temporarily hidden) */}
+      {showThemeToggle && (
+        <Card className="financial-card">
+          <div className="space-y-4">
+            <h3 className="font-semibold flex items-center gap-2">
+              {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              Appearance
+            </h3>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="dark-mode" className="text-sm font-medium">
+                  Dark Mode
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  Switch between light and dark themes
+                </p>
+              </div>
+              <Switch
+                id="dark-mode"
+                checked={isDarkMode}
+                onCheckedChange={handleToggleDarkMode}
+              />
             </div>
-            <Switch
-              id="dark-mode"
-              checked={isDarkMode}
-              onCheckedChange={handleToggleDarkMode}
-            />
           </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {/* Notifications */}
       <Card className="financial-card">

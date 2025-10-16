@@ -7,15 +7,15 @@
 @layer base {
   :root {
     /* Core colors - Financial green/blue theme */
-    --background: 248 250 252;
+    --background: 255 255 255;
     --foreground: 215 28% 17%;
     
     /* Cards and surfaces */
-    --card: 0 0% 100%;
+    --card: 255 255 255;
     --card-foreground: 215 28% 17%;
-    --card-hover: 220 14% 96%;
+    --card-hover: 255 255 255;
     
-    --popover: 0 0% 100%;
+    --popover: 255 255 255;
     --popover-foreground: 215 28% 17%;
     
     /* Primary - Success Green for savings */
@@ -29,10 +29,10 @@
     --secondary-foreground: 0 0% 100%;
     --secondary-light: 213 94% 78%;
     
-    /* Accent - Warning Orange for budgets */
-    --accent: 38 92% 50%;
+    /* Accent - Blue for budgets */
+    --accent: 213 94% 68%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 38 100% 70%;
+    --accent-light: 213 94% 78%;
     
     /* Muted tones */
     --muted: 220 14% 96%;
@@ -50,7 +50,7 @@
     /* Financial colors */
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --warning: 213 94% 68%;
     --warning-foreground: 0 0% 100%;
     --expense: 0 84.2% 60.2%;
     --expense-foreground: 0 0% 100%;
@@ -60,7 +60,7 @@
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 69% 58%));
     --gradient-secondary: linear-gradient(135deg, hsl(213 94% 68%), hsl(213 94% 78%));
-    --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%), hsl(38 100% 70%));
+    --gradient-accent: linear-gradient(135deg, hsl(213 94% 68%), hsl(213 94% 78%));
     --gradient-surface: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 14% 98%));
     --gradient-hero: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(213 94% 68%) 100%);
     
@@ -116,10 +116,10 @@
     --secondary-foreground: 215 28% 17%;
     --secondary-light: 213 94% 68%;
     
-    /* Accent - Warning Orange (adjusted) */
-    --accent: 38 100% 70%;
+    /* Accent - Blue (adjusted) */
+    --accent: 213 94% 78%;
     --accent-foreground: 215 28% 17%;
-    --accent-light: 38 92% 50%;
+    --accent-light: 213 94% 68%;
     
     --muted: 215 28% 17%;
     --muted-foreground: 217.9 10.6% 64.9%;
@@ -134,7 +134,7 @@
     /* Financial colors - dark mode */
     --success: 142 69% 58%;
     --success-foreground: 215 28% 17%;
-    --warning: 38 100% 70%;
+    --warning: 213 94% 78%;
     --warning-foreground: 215 28% 17%;
     --expense: 0 84.2% 60.2%;
     --expense-foreground: 210 40% 98%;
@@ -144,7 +144,7 @@
     /* Dark mode gradients */
     --gradient-primary: linear-gradient(135deg, hsl(142 69% 58%), hsl(142 76% 36%));
     --gradient-secondary: linear-gradient(135deg, hsl(213 94% 78%), hsl(213 94% 68%));
-    --gradient-accent: linear-gradient(135deg, hsl(38 100% 70%), hsl(38 92% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(213 94% 78%), hsl(213 94% 68%));
     --gradient-surface: linear-gradient(145deg, hsl(224 71% 4%), hsl(215 28% 17%));
     --gradient-hero: linear-gradient(135deg, hsl(142 69% 58%) 0%, hsl(213 94% 78%) 100%);
     

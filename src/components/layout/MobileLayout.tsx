@@ -75,7 +75,7 @@ export default function MobileLayout({
                 key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
-                  "flex flex-col items-center justify-center py-2 sm:py-3 px-1 sm:px-2 text-xs transition-all duration-200 active:scale-95 touch-manipulation",
+                  "relative flex flex-col items-center justify-center py-2 sm:py-3 px-1 sm:px-2 text-xs transition-all duration-200 active:scale-95 touch-manipulation",
                   isActive
                     ? "text-primary font-semibold"
                     : "text-muted-foreground hover:text-foreground active:text-primary"

@@ -5,7 +5,7 @@ export const expenseCategories: CategoryIcon[] = [
   { category: 'transport', icon: '🚗', color: 'text-blue-600' },
   { category: 'entertainment', icon: '🎬', color: 'text-purple-600' },
   { category: 'shopping', icon: '🛍️', color: 'text-pink-600' },
-  { category: 'bills', icon: '⚡', color: 'text-yellow-600' },
+  { category: 'bills', icon: '⚡', color: 'text-orange-600' },
   { category: 'healthcare', icon: '🏥', color: 'text-red-600' },
   { category: 'education', icon: '📚', color: 'text-indigo-600' },
   { category: 'other', icon: '📋', color: 'text-gray-600' },
@@ -17,7 +17,7 @@ export const savingsCategories: CategoryIcon[] = [
   { category: 'home', icon: '🏠', color: 'text-green-600' },
   { category: 'car', icon: '🚗', color: 'text-blue-600' },
   { category: 'education', icon: '🎓', color: 'text-indigo-600' },
-  { category: 'other', icon: '💰', color: 'text-yellow-600' },
+  { category: 'other', icon: '💰', color: 'text-gray-600' },
 ];
 
 export const getCategoryIcon = (category: ExpenseCategory | string): CategoryIcon => {
