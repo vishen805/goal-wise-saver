@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ExpensePieChart } from '@/components/charts/ExpensePieChart';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, CreditCard, Calendar, Trash2, Filter } from 'lucide-react';
 import { expensesStorage } from '@/lib/storage';
+import { t } from '@/lib/i18n';
 import { formatCurrency, formatDate, getCategoryIcon } from '@/lib/categories';
 import { Expense, ExpenseCategory } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
@@ -45,8 +47,8 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
     setIsAddDialogOpen(false);
     
     toast({
-      title: "Expense Logged! 💳",
-      description: `${formatCurrency(newExpense.amount)} for ${newExpense.description}`,
+      title: t('add_expense_success_title'),
+      description: `${formatCurrency(newExpense.amount)} ${t('add_expense_success_desc')} ${newExpense.description}`,
     });
   };
 
@@ -58,8 +60,8 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
     setExpenses(prev => prev.filter(e => e.id !== expenseId));
     
     toast({
-      title: "Expense Deleted",
-      description: `${expense.description} has been removed.`,
+      title: t('expense_deleted') || 'Expense Deleted',
+      description: `${expense.description} ${t('has_been_removed') || 'has been removed.'}`,
       variant: "destructive",
     });
   };
@@ -79,7 +81,7 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
       handleAddExpense(new FormData(e.currentTarget));
     }} className="space-y-4">
       <div>
-        <Label htmlFor="description">Description</Label>
+  <Label htmlFor="description">{t('description_label')}</Label>
         <Input
           id="description"
           name="description"
@@ -89,7 +91,7 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
       </div>
       
       <div>
-        <Label htmlFor="amount">Amount</Label>
+  <Label htmlFor="amount">{t('amount_label')}</Label>
         <Input
           id="amount"
           name="amount"
@@ -102,20 +104,20 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
       </div>
       
       <div>
-        <Label htmlFor="category">Category</Label>
+  <Label htmlFor="category">{t('category_label')}</Label>
         <Select name="category" required>
           <SelectTrigger>
-            <SelectValue placeholder="Select a category" />
+            <SelectValue placeholder={t('select_category')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="food">🍽️ Food & Dining</SelectItem>
-            <SelectItem value="transport">🚗 Transport</SelectItem>
-            <SelectItem value="entertainment">🎬 Entertainment</SelectItem>
-            <SelectItem value="shopping">🛍️ Shopping</SelectItem>
-            <SelectItem value="bills">⚡ Bills & Utilities</SelectItem>
-            <SelectItem value="healthcare">🏥 Healthcare</SelectItem>
-            <SelectItem value="education">📚 Education</SelectItem>
-            <SelectItem value="other">📋 Other</SelectItem>
+            <SelectItem value="food">🍽️ {t('food_and_dining') || 'Food & Dining'}</SelectItem>
+            <SelectItem value="transport">🚗 {t('transport') || 'Transport'}</SelectItem>
+            <SelectItem value="entertainment">🎬 {t('entertainment') || 'Entertainment'}</SelectItem>
+            <SelectItem value="shopping">🛍️ {t('shopping') || 'Shopping'}</SelectItem>
+            <SelectItem value="bills">⚡ {t('bills_utilities') || 'Bills & Utilities'}</SelectItem>
+            <SelectItem value="healthcare">🏥 {t('healthcare') || 'Healthcare'}</SelectItem>
+            <SelectItem value="education">📚 {t('education') || 'Education'}</SelectItem>
+            <SelectItem value="other">📋 {t('other') || 'Other'}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -141,9 +143,9 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold">Expense Tracking</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">Monitor your spending patterns</p>
-        </div>
+            <h2 className="text-xl sm:text-2xl font-bold">{t('expense_tracking')}</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">{t('monitor_spending')}</p>
+          </div>
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -153,7 +155,7 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Expense</DialogTitle>
+              <DialogTitle>{t('add_expense')}</DialogTitle>
             </DialogHeader>
             <ExpenseForm />
           </DialogContent>
@@ -161,26 +163,36 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
       </div>
 
           {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <Card className="financial-card gradient-secondary text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white/80 text-xs sm:text-sm">This Month</p>
-              <p className="text-lg sm:text-2xl font-bold break-all">{formatCurrency(currentMonthExpenses)}</p>
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <Card className="financial-card gradient-secondary text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/80 text-xs sm:text-sm">{t('this_month') || 'This Month'}</p>
+                <p className="text-lg sm:text-2xl font-bold break-all">{formatCurrency(currentMonthExpenses)}</p>
+              </div>
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-white/80 flex-shrink-0" />
             </div>
-            <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-white/80 flex-shrink-0" />
-          </div>
-        </Card>
-        
-        <Card className="financial-card gradient-accent text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white/80 text-xs sm:text-sm">Total Filtered</p>
-              <p className="text-lg sm:text-2xl font-bold break-all">{formatCurrency(totalExpenses)}</p>
+          </Card>
+          
+          <Card className="financial-card gradient-accent text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white/80 text-xs sm:text-sm">{t('total_filtered') || 'Total Filtered'}</p>
+                <p className="text-lg sm:text-2xl font-bold break-all">{formatCurrency(totalExpenses)}</p>
+              </div>
+              <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white/80 flex-shrink-0" />
             </div>
-            <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-white/80 flex-shrink-0" />
-          </div>
-        </Card>
+          </Card>
+        </div>
+
+        {expenses.length > 0 && (
+          <ExpensePieChart 
+            expenses={filteredExpenses}
+            title={t('expense_categories') || 'Expense Categories'}
+            height={350}
+          />
+        )}
       </div>
 
       {/* Filter */}
@@ -192,15 +204,15 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="food">🍽️ Food & Dining</SelectItem>
-              <SelectItem value="transport">🚗 Transport</SelectItem>
-              <SelectItem value="entertainment">🎬 Entertainment</SelectItem>
-              <SelectItem value="shopping">🛍️ Shopping</SelectItem>
-              <SelectItem value="bills">⚡ Bills & Utilities</SelectItem>
-              <SelectItem value="healthcare">🏥 Healthcare</SelectItem>
-              <SelectItem value="education">📚 Education</SelectItem>
-              <SelectItem value="other">📋 Other</SelectItem>
+              <SelectItem value="all">{t('all_categories')}</SelectItem>
+              <SelectItem value="food">🍽️ {t('food_and_dining') || 'Food & Dining'}</SelectItem>
+              <SelectItem value="transport">🚗 {t('transport') || 'Transport'}</SelectItem>
+              <SelectItem value="entertainment">🎬 {t('entertainment') || 'Entertainment'}</SelectItem>
+              <SelectItem value="shopping">🛍️ {t('shopping') || 'Shopping'}</SelectItem>
+              <SelectItem value="bills">⚡ {t('bills_utilities') || 'Bills & Utilities'}</SelectItem>
+              <SelectItem value="healthcare">🏥 {t('healthcare') || 'Healthcare'}</SelectItem>
+              <SelectItem value="education">📚 {t('education') || 'Education'}</SelectItem>
+              <SelectItem value="other">📋 {t('other') || 'Other'}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -210,16 +222,16 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
       {filteredExpenses.length === 0 ? (
         <Card className="financial-card text-center py-12">
           <CreditCard className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No expenses found</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('no_expenses_found')}</h3>
           <p className="text-muted-foreground mb-6">
             {filterCategory === 'all' 
-              ? "Start tracking your expenses to see where your money goes!"
-              : `No expenses found in the ${filterCategory} category.`
+              ? t('start_tracking_expenses')
+              : `${t('no_expenses_found')} ${filterCategory} ${t('category') || 'category.'}`
             }
           </p>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="expense">Add Your First Expense</Button>
+              <Button variant="expense">{t('add_first_expense')}</Button>
             </DialogTrigger>
           </Dialog>
         </Card>
@@ -270,11 +282,11 @@ export default function ExpensesScreen({ onNavigate }: ExpensesScreenProps) {
           onClick={() => setIsAddDialogOpen(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add Expense
+          {t('add_expense')}
         </Button>
         <Button variant="ghost" className="py-6">
           <Calendar className="w-4 h-4 mr-2" />
-          View History
+          {t('view_history')}
         </Button>
       </div>
     </div>

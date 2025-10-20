@@ -3,6 +3,7 @@ import { ArrowLeft, DollarSign, Target, TrendingUp, Award, BarChart3, FileText }
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
+import { t } from '@/lib/i18n';
 
 const HowToUse = () => {
   const navigate = useNavigate();
@@ -10,68 +11,68 @@ const HowToUse = () => {
   const features = [
     {
       icon: <DollarSign className="h-6 w-6" />,
-      title: "Track Expenses",
-      description: "Add your daily expenses by category. Track where your money goes to identify spending patterns.",
+      title: t('howto_track_title'),
+      description: t('howto_track_desc'),
       steps: [
-        "Go to the Expenses tab",
-        "Tap the '+' button to add a new expense",
-        "Enter amount, select category, and add description",
-        "View all your expenses in an organized list"
+        t('howto_track_step_1'),
+        t('howto_track_step_2'),
+        t('howto_track_step_3'),
+        t('howto_track_step_4')
       ]
     },
     {
       icon: <Target className="h-6 w-6" />,
-      title: "Set Savings Goals",
-      description: "Create specific savings targets and track your progress toward achieving them.",
+      title: t('howto_goals_title'),
+      description: t('howto_goals_desc'),
       steps: [
-        "Navigate to the Goals tab",
-        "Tap 'Add New Goal' to create a savings target",
-        "Set your goal amount and target date",
-        "Add money to goals to track progress"
+        t('howto_goals_step_1'),
+        t('howto_goals_step_2'),
+        t('howto_goals_step_3'),
+        t('howto_goals_step_4')
       ]
     },
     {
       icon: <BarChart3 className="h-6 w-6" />,
-      title: "View Analytics",
-      description: "Analyze your spending with interactive charts and detailed breakdowns.",
+      title: t('howto_analytics_title'),
+      description: t('howto_analytics_desc'),
       steps: [
-        "Check the Dashboard for overview charts",
-        "View pie charts showing expense categories",
-        "Track savings progress over time",
-        "Monitor budget vs actual spending"
+        t('howto_analytics_step_1'),
+        t('howto_analytics_step_2'),
+        t('howto_analytics_step_3'),
+        t('howto_analytics_step_4')
       ]
     },
     {
       icon: <Award className="h-6 w-6" />,
-      title: "Earn Badges",
-      description: "Build saving streaks and earn badges for consistent financial habits.",
+      title: t('howto_badges_title'),
+      description: t('howto_badges_desc'),
       steps: [
-        "Save money daily to build streaks",
-        "Earn badges for 7-day saving streaks",
-        "View your badges in the dashboard",
-        "Challenge yourself to maintain longer streaks"
+        t('howto_badges_step_1'),
+        t('howto_badges_step_2'),
+        t('howto_badges_step_3'),
+        t('howto_badges_step_4')
       ]
     },
     {
       icon: <TrendingUp className="h-6 w-6" />,
-      title: "Take Challenges",
-      description: "Participate in weekly and monthly challenges to improve your financial habits.",
+      title: t('howto_challenges_title'),
+      description: t('howto_challenges_desc'),
       steps: [
-        "View active challenges on the dashboard",
-        "Join challenges like 'No-spend weekend'",
-        "Track your progress throughout the challenge",
-        "Earn rewards for completing challenges"
+        t('howto_challenges_step_1'),
+        t('howto_challenges_step_2'),
+        t('howto_challenges_step_3'),
+        t('howto_challenges_step_4')
       ]
     },
     {
       icon: <FileText className="h-6 w-6" />,
-      title: "Export Data",
-      description: "Export your financial data to CSV or Excel for external analysis.",
+      title: t('howto_export_title'),
+      description: t('howto_export_desc'),
       steps: [
-        "Go to Settings",
-        "Select 'Export Data'",
-        "Choose format (CSV or Excel)",
-        "Download your financial records"
+        t('howto_export_step_1'),
+        t('howto_export_step_2'),
+        t('howto_export_step_3'),
+        t('howto_export_step_4')
       ]
     }
   ];
@@ -89,7 +90,7 @@ const HowToUse = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-bold">How to Use Smart Saver</h1>
+          <h1 className="text-xl font-bold">{t('help_support')}</h1>
         </div>
       </div>
 
@@ -98,10 +99,9 @@ const HowToUse = () => {
         {/* Welcome Card */}
         <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
           <CardHeader>
-            <CardTitle className="text-2xl">Welcome to Smart Saver! 🎉</CardTitle>
+            <CardTitle className="text-2xl">{t('app_title')} 🎉</CardTitle>
             <CardDescription className="text-base">
-              Your personal finance companion designed to help you track expenses, 
-              achieve savings goals, and build better financial habits.
+              {t('built_with')}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -111,28 +111,28 @@ const HowToUse = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Getting Started
+              {t('help_support')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shrink-0">1</div>
-              <p>Start by adding your first expense to see how easy tracking can be</p>
+              <p>{t('getting_started_1')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shrink-0">2</div>
-              <p>Set up your first savings goal to have something to work toward</p>
+              <p>{t('getting_started_2')}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shrink-0">3</div>
-              <p>Check the dashboard daily to monitor your financial progress</p>
+              <p>{t('getting_started_3')}</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Features */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Key Features</h2>
+          <h2 className="text-xl font-semibold">{t('key_features')}</h2>
           {features.map((feature, index) => (
             <Card key={index}>
               <CardHeader>
@@ -146,7 +146,7 @@ const HowToUse = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p className="font-medium text-sm">How to use:</p>
+                  <p className="font-medium text-sm">{t('how_to_use') || 'How to use:'}</p>
                   <ol className="space-y-1">
                     {feature.steps.map((step, stepIndex) => (
                       <li key={stepIndex} className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -162,7 +162,7 @@ const HowToUse = () => {
         </div>
 
         {/* Tips */}
-        <Card className="bg-gradient-to-r from-secondary/10 to-accent/10 border-secondary/20">
+          <Card className="bg-gradient-to-r from-secondary/10 to-accent/10 border-secondary/20">
           <CardHeader>
             <CardTitle>💡 Pro Tips</CardTitle>
           </CardHeader>
@@ -182,7 +182,7 @@ const HowToUse = () => {
             className="w-full"
             size="lg"
           >
-            Start Using Smart Saver
+            {t('app_title')}
           </Button>
         </div>
       </div>

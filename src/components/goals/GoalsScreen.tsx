@@ -11,6 +11,8 @@ import { savingsGoalsStorage } from '@/lib/storage';
 import { formatCurrency, formatDate, getCategoryIcon, getProgressColor } from '@/lib/categories';
 import { SavingsGoal } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
+import { t } from '@/lib/i18n';
+import ProjectionPanel from './ProjectionPanel';
 
 interface GoalsScreenProps {
   onNavigate?: (tab: string, title?: string) => void;
@@ -47,8 +49,8 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
     setIsAddDialogOpen(false);
     
     toast({
-      title: "Goal Created! 🎯",
-      description: `"${newGoal.name}" has been added to your savings goals.`,
+      title: t('goal_created_title') || 'Goal Created! 🎯',
+      description: `"${newGoal.name}" ${t('goal_created_desc') || 'has been added to your savings goals.'}`,
     });
   };
 
@@ -66,10 +68,10 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
 
     const isCompleted = newAmount >= goal.targetAmount;
     toast({
-      title: isCompleted ? "Goal Completed! 🎉" : "Progress Updated! 💰",
+      title: isCompleted ? t('goal_completed') || 'Goal Completed! 🎉' : t('progress_updated') || 'Progress Updated! 💰',
       description: isCompleted 
-        ? `Congratulations! You've reached your "${goal.name}" goal!`
-        : `Added ${formatCurrency(amount)} to "${goal.name}"`,
+        ? t('congrats_reached')?.replace('{name}', goal.name) || `Congratulations! You've reached your "${goal.name}" goal!`
+        : `${t('added_amount') || 'Added'} ${formatCurrency(amount)} ${t('to_goal') || 'to'} "${goal.name}"`,
     });
   };
 
@@ -81,8 +83,8 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
     setGoals(prev => prev.filter(g => g.id !== goalId));
     
     toast({
-      title: "Goal Deleted",
-      description: `"${goal.name}" has been removed from your goals.`,
+      title: t('goal_deleted_title') || 'Goal Deleted',
+      description: `"${goal.name}" ${t('has_been_removed') || 'has been removed from your goals.'}`,
       variant: "destructive",
     });
   };
@@ -93,7 +95,7 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
       onSubmit(new FormData(e.currentTarget));
     }} className="space-y-4">
       <div>
-        <Label htmlFor="name">Goal Name</Label>
+  <Label htmlFor="name">{t('goal_name')}</Label>
         <Input
           id="name"
           name="name"
@@ -107,7 +109,7 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
         <Label htmlFor="category">Category</Label>
         <Select name="category" defaultValue={goal?.category}>
           <SelectTrigger>
-            <SelectValue placeholder="Select a category" />
+            <SelectValue placeholder={t('select_category')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="vacation">✈️ Vacation</SelectItem>
@@ -121,7 +123,7 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
       </div>
       
       <div>
-        <Label htmlFor="targetAmount">Target Amount</Label>
+  <Label htmlFor="targetAmount">{t('target_amount')}</Label>
         <Input
           id="targetAmount"
           name="targetAmount"
@@ -135,7 +137,7 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
       </div>
       
       <div>
-        <Label htmlFor="currentAmount">Current Amount</Label>
+  <Label htmlFor="currentAmount">{t('current_amount')}</Label>
         <Input
           id="currentAmount"
           name="currentAmount"
@@ -148,7 +150,7 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
       </div>
       
       <div>
-        <Label htmlFor="deadline">Target Date</Label>
+  <Label htmlFor="deadline">{t('target_date')}</Label>
         <Input
           id="deadline"
           name="deadline"
@@ -159,17 +161,18 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
       </div>
       
       <Button type="submit" className="w-full" variant="goal">
-        {goal ? 'Update Goal' : 'Create Goal'}
+        {goal ? t('update_goal') || 'Update Goal' : t('create_goal') || 'Create Goal'}
       </Button>
     </form>
   );
 
   return (
     <div className="p-4 space-y-6">
+      <ProjectionPanel />
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold">Savings Goals</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">Track your financial milestones</p>
+          <h2 className="text-xl sm:text-2xl font-bold">{t('savings_goals')}</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">{t('track_milestones')}</p>
         </div>
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -180,7 +183,7 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Goal</DialogTitle>
+              <DialogTitle>{t('add_new_goal')}</DialogTitle>
             </DialogHeader>
             <GoalForm onSubmit={handleAddGoal} />
           </DialogContent>
@@ -190,13 +193,13 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
       {goals.length === 0 ? (
         <Card className="financial-card text-center py-12">
           <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No savings goals yet</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('no_savings_goals')}</h3>
           <p className="text-muted-foreground mb-6">
-            Create your first savings goal to start building your financial future!
+            {t('create_first_goal')}
           </p>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="goal">Create Your First Goal</Button>
+              <Button variant="goal">{t('create_first_goal')}</Button>
             </DialogTrigger>
           </Dialog>
         </Card>
@@ -218,9 +221,9 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
                       <div className="text-2xl">{categoryIcon.icon}</div>
                       <div>
                         <h3 className="font-semibold">{goal.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDate(goal.deadline)} • {daysUntilDeadline > 0 ? `${daysUntilDeadline} days left` : 'Overdue'}
-                        </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatDate(goal.deadline)} • {daysUntilDeadline > 0 ? `${daysUntilDeadline} ${t('days_left').replace('{n}', String(daysUntilDeadline))}` : t('overdue')}
+                                  </p>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -243,7 +246,7 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
 
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Progress</span>
+                      <span className="text-sm font-medium">{t('progress')}</span>
                       <span className={`text-sm font-semibold ${getProgressColor(percentage)}`}>
                         {percentage.toFixed(1)}%
                         {isCompleted && " ✅"}
@@ -260,14 +263,14 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button
+                      <Button
                       variant="success"
                       size="sm"
                       onClick={() => handleUpdateProgress(goal.id, 50)}
                       className="flex-1"
                     >
                       <DollarSign className="w-4 h-4" />
-                      +$50
+                      {t('add_50')}
                     </Button>
                     <Button
                       variant="success"
@@ -276,18 +279,18 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
                       className="flex-1"
                     >
                       <DollarSign className="w-4 h-4" />
-                      +$100
+                      {t('add_100')}
                     </Button>
-                    <Button
+                      <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const amount = prompt("Enter amount to add:");
+                        const amount = prompt(t('add_amount_prompt') || 'Enter amount to add:');
                         if (amount) handleUpdateProgress(goal.id, parseFloat(amount));
                       }}
                       className="flex-1"
                     >
-                      Custom
+                      {t('custom')}
                     </Button>
                   </div>
                 </div>
@@ -301,8 +304,8 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
       {editingGoal && (
         <Dialog open={!!editingGoal} onOpenChange={() => setEditingGoal(null)}>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Goal</DialogTitle>
+                <DialogHeader>
+              <DialogTitle>{t('update_goal')}</DialogTitle>
             </DialogHeader>
             <GoalForm
               goal={editingGoal}
@@ -322,8 +325,8 @@ export default function GoalsScreen({ onNavigate }: GoalsScreenProps) {
                 setEditingGoal(null);
                 
                 toast({
-                  title: "Goal Updated! ✏️",
-                  description: `"${updates.name}" has been updated successfully.`,
+                  title: t('goal_updated_title') || 'Goal Updated! ✏️',
+                  description: `"${updates.name}" ${t('has_been_updated') || 'has been updated successfully.'}`,
                 });
               }}
             />

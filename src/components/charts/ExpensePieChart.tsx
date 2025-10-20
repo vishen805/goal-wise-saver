@@ -2,7 +2,8 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Expense, ExpenseCategory } from '@/types/financial';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCategoryIcon } from '@/lib/categories';
+import { getCategoryIcon, formatCurrency } from '@/lib/categories';
+import { t } from '@/lib/i18n';
 
 interface ExpensePieChartProps {
   /** Array of expenses to analyze */
@@ -26,6 +27,18 @@ interface ChartDataItem {
  * @returns Transformed data for chart
  */
 const transformExpenseData = (expenses: Expense[]): ChartDataItem[] => {
+  // 每個類別的顏色映射
+  const categoryColors: Record<ExpenseCategory, string> = {
+    food: '#FF6B6B',       // 食物 - 暖紅色
+    transport: '#4ECDC4',  // 交通 - 青綠色
+    entertainment: '#FFD93D', // 娛樂 - 明黃色
+    shopping: '#95A5A6',   // 購物 - 柔和灰色
+    bills: '#6C5CE7',      // 帳單 - 深紫色
+    healthcare: '#A8E6CF', // 醫療 - 薄荷綠
+    education: '#FF8B94',  // 教育 - 粉紅色
+    other: '#45B7D1'       // 其他 - 天藍色
+  };
+
   const categoryTotals: Record<ExpenseCategory, number> = {
     food: 0,
     transport: 0,
@@ -47,10 +60,25 @@ const transformExpenseData = (expenses: Expense[]): ChartDataItem[] => {
     .filter(([_, amount]) => amount > 0) // Only include categories with spending
     .map(([category, amount]) => {
       const categoryInfo = getCategoryIcon(category as ExpenseCategory);
+      // map internal category key to i18n key
+      const categoryKeyMap: Record<string, string> = {
+        food: 'food_and_dining',
+        transport: 'transport',
+        entertainment: 'entertainment',
+        shopping: 'shopping',
+        bills: 'bills_utilities',
+        healthcare: 'healthcare',
+        education: 'education',
+        other: 'other'
+      };
+
+      const i18nKey = categoryKeyMap[category] || category;
+      const localizedName = t(i18nKey);
+
       return {
-        name: category.charAt(0).toUpperCase() + category.slice(1),
+        name: localizedName,
         value: amount,
-        color: categoryInfo.color,
+        color: categoryColors[category as ExpenseCategory],
         icon: categoryInfo.icon
       };
     })
@@ -69,10 +97,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           {data.icon} {data.name}
         </p>
         <p className="text-primary">
-          Amount: ${data.value.toFixed(2)}
+          {t('amount_label')}: {formatCurrency(data.value)}
         </p>
         <p className="text-muted-foreground text-sm">
-          {((data.value / payload[0].payload.total) * 100).toFixed(1)}% of total
+          {t('percent_of_total', { percent: ((data.value / payload[0].payload.total) * 100).toFixed(1) })}
         </p>
       </div>
     );
@@ -92,9 +120,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
  */
 export const ExpensePieChart: React.FC<ExpensePieChartProps> = ({
   expenses,
-  title = "Expense Categories",
+  title,
   height = 300
 }) => {
+  const chartTitle = title || t('expense_chart_title');
   const chartData = transformExpenseData(expenses);
   const totalAmount = chartData.reduce((sum, item) => sum + item.value, 0);
 
@@ -112,8 +141,8 @@ export const ExpensePieChart: React.FC<ExpensePieChartProps> = ({
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
           <div className="text-center text-muted-foreground">
-            <p>No expense data available</p>
-            <p className="text-sm">Start logging expenses to see your spending breakdown</p>
+            <p>{t('no_expense_data')}</p>
+            <p className="text-sm">{t('start_logging_expenses')}</p>
           </div>
         </CardContent>
       </Card>
@@ -123,10 +152,10 @@ export const ExpensePieChart: React.FC<ExpensePieChartProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          {title}
+          <CardTitle className="flex items-center justify-between">
+          {chartTitle}
           <span className="text-sm font-normal text-muted-foreground">
-            Total: ${totalAmount.toFixed(2)}
+            {t('total_label', { value: formatCurrency(totalAmount) })}
           </span>
         </CardTitle>
       </CardHeader>
@@ -159,11 +188,11 @@ export const ExpensePieChart: React.FC<ExpensePieChartProps> = ({
         {/* Summary stats below chart */}
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-muted-foreground">Categories</p>
+            <p className="text-muted-foreground">{t('categories_label')}</p>
             <p className="font-semibold">{chartData.length}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Largest Category</p>
+            <p className="text-muted-foreground">{t('largest_category_label')}</p>
             <p className="font-semibold">
               {chartData[0]?.icon} {chartData[0]?.name}
             </p>

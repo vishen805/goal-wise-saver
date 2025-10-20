@@ -11,6 +11,7 @@ import { MonthlyIncome } from '@/types/financial';
 import { incomeStorage } from '@/lib/storage';
 import { formatCurrency } from '@/lib/categories';
 import { toast } from 'sonner';
+import { t } from '@/lib/i18n';
 
 interface IncomeInputProps {
   onIncomeUpdate?: () => void;
@@ -43,13 +44,13 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
     e.preventDefault();
     
     if (!formData.amount || !formData.source) {
-      toast.error('Please fill in all fields');
+      toast.error(t('income_fill_all_fields'));
       return;
     }
 
     const amount = parseFloat(formData.amount);
     if (amount <= 0) {
-      toast.error('Amount must be greater than 0');
+      toast.error(t('income_amount_gt_zero'));
       return;
     }
 
@@ -61,7 +62,7 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
         source: formData.source,
         isRecurring: formData.isRecurring
       });
-      toast.success('Income updated successfully');
+      toast.success(t('income_updated'));
     } else {
       const newIncome: MonthlyIncome = {
         id: Date.now().toString(),
@@ -73,7 +74,7 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
       };
       
       incomeStorage.add(newIncome);
-      toast.success('Income added successfully');
+      toast.success(t('income_added'));
     }
 
     resetForm();
@@ -93,7 +94,7 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
 
   const handleDelete = (id: string) => {
     incomeStorage.delete(id);
-    toast.success('Income deleted');
+    toast.success(t('income_deleted'));
     loadIncomes();
     onIncomeUpdate?.();
   };
@@ -115,35 +116,35 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold flex items-center gap-2">
           <DollarSign className="w-5 h-5 text-primary" />
-          Monthly Income
+          {t('monthly_income_title')}
         </h3>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" onClick={() => resetForm()}>
               <Plus className="w-4 h-4 mr-2" />
-              Add Income
+              {t('add_income_button')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingIncome ? 'Edit Income' : 'Add Income Source'}
+                {editingIncome ? t('edit_income_title') : t('add_income_title')}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="source">Income Source</Label>
+                <Label htmlFor="source">{t('income_source_label')}</Label>
                 <Input
                   id="source"
                   value={formData.source}
                   onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                  placeholder="e.g., Salary, Freelance, Side hustle"
+                  placeholder={t('source_placeholder')}
                   required
                 />
               </div>
               
               <div>
-                <Label htmlFor="amount">Monthly Amount</Label>
+                <Label htmlFor="amount">{t('monthly_amount_label')}</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -151,7 +152,7 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
                   min="0"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  placeholder="0.00"
+                  placeholder={t('amount_placeholder')}
                   required
                 />
               </div>
@@ -162,15 +163,15 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
                   checked={formData.isRecurring}
                   onCheckedChange={(checked) => setFormData({ ...formData, isRecurring: checked })}
                 />
-                <Label htmlFor="recurring">Recurring monthly income</Label>
+                <Label htmlFor="recurring">{t('recurring_label')}</Label>
               </div>
 
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button type="submit">
-                  {editingIncome ? 'Update' : 'Add'} Income
+                  {editingIncome ? t('update_income_action') : t('add_income_action')}
                 </Button>
               </div>
             </form>
@@ -183,14 +184,14 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
           <div className="text-center py-8">
             <DollarSign className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
             <p className="text-muted-foreground mb-4">
-              Add your income sources to get better financial insights
+              {t('income_empty_hint')}
             </p>
           </div>
         ) : (
           <>
             <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-lg p-4 mb-4">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground">Total Monthly Income</p>
+                <p className="text-sm text-muted-foreground">{t('total_monthly_income')}</p>
                 <p className="text-3xl font-bold text-success">
                   {formatCurrency(totalIncome)}
                 </p>
@@ -204,7 +205,7 @@ export function IncomeInput({ onIncomeUpdate }: IncomeInputProps) {
                     <span className="font-medium">{income.source}</span>
                     {income.isRecurring && (
                       <Badge variant="outline" className="text-xs">
-                        Recurring
+                        {t('recurring_badge')}
                       </Badge>
                     )}
                   </div>

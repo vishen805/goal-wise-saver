@@ -1,6 +1,7 @@
 import { subMonths, isWithinInterval } from 'date-fns';
 import { expensesStorage, savingsGoalsStorage, budgetsStorage, tipsStorage } from '@/lib/storage';
 import { Tip, ExpenseCategory, Expense } from '@/types/financial';
+import { formatCurrency } from '@/lib/categories';
 
 /**
  * Generates personalized tips based on user's spending patterns
@@ -54,12 +55,12 @@ const generateCategoryTips = (expenses: Expense[]): Tip[] => {
   
   Object.entries(categorySpending).forEach(([category, monthlyAverage]) => {
     if (monthlyAverage > 200) { // Only suggest for categories with significant spending
-      const reductionAmount = Math.min(monthlyAverage * 0.2, 50); // Suggest 20% reduction, max $50
+      const reductionAmount = Math.min(monthlyAverage * 0.2, 50); // Suggest 20% reduction, max 50 (formatted by currency)
       const yearlyImpact = reductionAmount * 12;
       
       tips.push({
         id: `category_${category}_${Date.now()}`,
-        text: `Reducing ${category} expenses by $${reductionAmount.toFixed(0)}/month could save you $${yearlyImpact.toFixed(0)} annually.`,
+        text: `Reducing ${category} expenses by ${formatCurrency(reductionAmount)}/month could save you ${formatCurrency(yearlyImpact)} annually.`,
         impactYearly: yearlyImpact,
         confidenceScore: monthlyAverage > 300 ? 0.8 : 0.6,
         relatedCategory: category as ExpenseCategory,
@@ -91,7 +92,7 @@ const generateBudgetTips = (expenses: Expense[], budgets: any[]): Tip[] => {
       
       tips.push({
         id: `budget_${budget.category}_${Date.now()}`,
-        text: `You're overspending on ${budget.category} by $${overspend.toFixed(0)}/month. Sticking to your budget saves $${yearlyWaste.toFixed(0)}/year.`,
+        text: `You're overspending on ${budget.category} by ${formatCurrency(overspend)}/month. Sticking to your budget saves ${formatCurrency(yearlyWaste)}/year.`,
         impactYearly: yearlyWaste,
         confidenceScore: 0.9, // High confidence for budget overruns
         relatedCategory: budget.category,
@@ -125,7 +126,7 @@ const generateSavingsGoalTips = (expenses: Expense[], savingsGoals: any[]): Tip[
       
       tips.push({
         id: `savings_${goal.id}_${Date.now()}`,
-        text: `To reach your ${goal.name} goal, save $${monthlyNeeded.toFixed(0)}/month. Consider reducing discretionary spending by $${suggestedReduction.toFixed(0)}/month.`,
+        text: `To reach your ${goal.name} goal, save ${formatCurrency(monthlyNeeded)}/month. Consider reducing discretionary spending by ${formatCurrency(suggestedReduction)}/month.`,
         impactYearly: suggestedReduction * 12,
         confidenceScore: 0.7,
         relatedCategory: 'other' as ExpenseCategory,
@@ -156,7 +157,7 @@ const generateTrendTips = (expenses: Expense[]): Tip[] => {
     if (increase > 100) { // Significant increase
       tips.push({
         id: `trend_increase_${Date.now()}`,
-        text: `Your spending increased by $${increase.toFixed(0)} last month. Identifying the cause could prevent $${(increase * 12).toFixed(0)} in annual overspending.`,
+        text: `Your spending increased by ${formatCurrency(increase)} last month. Identifying the cause could prevent ${formatCurrency(increase * 12)} in annual overspending.`,
         impactYearly: increase * 12,
         confidenceScore: 0.6,
         relatedCategory: 'other' as ExpenseCategory,

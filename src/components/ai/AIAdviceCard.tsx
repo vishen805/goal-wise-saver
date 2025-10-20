@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { AIAdvice } from '@/types/financial';
 import { formatCurrency } from '@/lib/categories';
+import { t } from '@/lib/i18n';
 
 interface AIAdviceCardProps {
   advice: AIAdvice[];
@@ -27,7 +28,7 @@ export function AIAdviceCard({ advice, onRefresh, onViewDetails }: AIAdviceCardP
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold flex items-center gap-2">
             <PiggyBank className="w-5 h-5 text-primary" />
-            AI Financial Advisor
+            {t('ai_advisor_title')}
           </h3>
           <Button
             variant="ghost"
@@ -41,10 +42,10 @@ export function AIAdviceCard({ advice, onRefresh, onViewDetails }: AIAdviceCardP
         <div className="text-center py-8">
           <PiggyBank className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground mb-4">
-            Add some expenses and income to get personalized advice!
+            {t('ai_no_data')}
           </p>
           <Button onClick={onRefresh} variant="outline">
-            Generate Advice
+            {t('generate_advice')}
           </Button>
         </div>
       </Card>
@@ -87,7 +88,7 @@ export function AIAdviceCard({ advice, onRefresh, onViewDetails }: AIAdviceCardP
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold flex items-center gap-2">
           <PiggyBank className="w-5 h-5 text-primary" />
-          AI Financial Advisor
+          {t('ai_advisor_title')}
         </h3>
         <Button
           variant="ghost"
@@ -102,16 +103,16 @@ export function AIAdviceCard({ advice, onRefresh, onViewDetails }: AIAdviceCardP
       {/* Potential Savings Summary */}
       <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-4 mb-4">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">Potential Annual Savings</p>
+            <div>
+            <p className="text-sm text-muted-foreground">{t('potential_annual_savings')}</p>
             <p className="text-2xl font-bold text-primary">
               {formatCurrency(totalPotentialSavings)}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">{advice.length} insights</p>
+            <div className="text-right">
+            <p className="text-sm text-muted-foreground">{advice.length} {t('insights')}</p>
             <Badge variant={getPriorityColor(topAdvice.priority)} className="mt-1">
-              {topAdvice.priority} priority
+              {t(`priority_${topAdvice.priority}`) || topAdvice.priority}
             </Badge>
           </div>
         </div>
@@ -138,14 +139,14 @@ export function AIAdviceCard({ advice, onRefresh, onViewDetails }: AIAdviceCardP
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div>
-                <p className="text-xs text-muted-foreground">Monthly Impact</p>
+                <p className="text-xs text-muted-foreground">{t('monthly_impact_label')}</p>
                 <p className="text-sm font-medium text-success">
                   +{formatCurrency(topAdvice.impact.monthlySavings)}
                 </p>
               </div>
               {topAdvice.impact.goalTimeReduction && (
                 <div>
-                  <p className="text-xs text-muted-foreground">Time Saved</p>
+                  <p className="text-xs text-muted-foreground">{t('time_saved_label')}</p>
                   <p className="text-sm font-medium text-primary">
                     {topAdvice.impact.goalTimeReduction} months
                   </p>
@@ -183,12 +184,12 @@ export function AIAdviceCard({ advice, onRefresh, onViewDetails }: AIAdviceCardP
         )}
 
         {advice.length > 3 && (
-          <Button 
+            <Button 
             variant="outline" 
             className="w-full"
             onClick={() => {/* Navigate to full AI advisor screen */}}
           >
-            View All {advice.length} Insights
+            {t('view_all_insights').replace('{n}', String(advice.length))}
           </Button>
         )}
       </div>

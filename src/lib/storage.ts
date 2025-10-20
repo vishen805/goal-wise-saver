@@ -10,7 +10,21 @@ const STORAGE_KEYS = {
   SAVING_ACTIVITIES: 'smartsaver-activities',
   TIPS: 'smartsaver-tips',
   INCOME: 'smartsaver-income',
-  AI_ADVICE: 'smartsaver-ai-advice'
+  AI_ADVICE: 'smartsaver-ai-advice',
+  AI_ADVICE_LANG: 'smartsaver-ai-advice-lang',
+  LANGUAGE: 'smartsaver-language'
+  ,CURRENCY: 'smartsaver-currency'
+};
+
+
+export const languageStorage = {
+  get: (): 'en' | 'zh' => {
+    const stored = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
+    return (stored === 'zh' ? 'zh' : 'en');
+  },
+  set: (lang: 'en' | 'zh'): void => {
+    localStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
+  }
 };
 
 // Savings Goals Storage
@@ -325,6 +339,12 @@ export const aiAdviceStorage = {
       current.splice(10);
     }
     this.set(current);
+    // store the language used when caching advice so UI can detect stale language
+    try {
+      localStorage.setItem(STORAGE_KEYS.AI_ADVICE_LANG, languageStorage.get());
+    } catch (e) {
+      // ignore
+    }
   },
 
   clear(): void {
@@ -333,5 +353,46 @@ export const aiAdviceStorage = {
 
   getLatest(limit = 3): AIAdvice[] {
     return this.get().slice(0, limit);
+  }
+  ,
+  getLang(): 'en' | 'zh' {
+    const lang = localStorage.getItem(STORAGE_KEYS.AI_ADVICE_LANG);
+    return (lang === 'zh' ? 'zh' : 'en');
+  }
+};
+
+export const currencyStorage = {
+  get: (): string => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.CURRENCY);
+      return stored || 'USD';
+    } catch (e) {
+      return 'USD';
+    }
+  },
+  set: (currency: string): void => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CURRENCY, currency);
+    } catch (e) {
+      // ignore
+    }
+  }
+};
+
+// Try to sync from a remote SQL server endpoint that returns JSON
+export const syncFromSqlServer = async (url: string): Promise<boolean> => {
+  try {
+    const resp = await fetch(url.replace(/\/+$/, '') + '/sync');
+    if (!resp.ok) return false;
+    const data = await resp.json();
+
+    if (data.expenses) expensesStorage.set(data.expenses as Expense[]);
+    if (data.savingsGoals) savingsGoalsStorage.set(data.savingsGoals as SavingsGoal[]);
+    if (data.budgets) budgetsStorage.set(data.budgets as Budget[]);
+
+    return true;
+  } catch (e) {
+    console.warn('Failed to sync from SQL server', e);
+    return false;
   }
 };

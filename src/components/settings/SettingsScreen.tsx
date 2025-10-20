@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { dataStorage, savingsGoalsStorage, expensesStorage, budgetsStorage } from '@/lib/storage';
+import { languageStorage } from '@/lib/storage';
+import { t, setLanguage } from '@/lib/i18n';
 import { useToast } from '@/hooks/use-toast';
 
 interface SettingsScreenProps {
@@ -119,11 +121,29 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
 
   const stats = getDataStats();
 
+  const [language, setLang] = useState<'en' | 'zh'>(() => languageStorage.get());
+  const [currency, setCurrency] = useState<string>(() => {
+    try { return (localStorage.getItem('smartsaver-currency') || 'USD'); } catch { return 'USD'; }
+  });
+
+  const handleLanguageChange = (lang: 'en' | 'zh') => {
+    setLang(lang);
+    languageStorage.set(lang);
+    setLanguage(lang);
+    toast({ title: t('language_updated') || 'Language updated' });
+  };
+
+  const handleCurrencyChange = (c: string) => {
+    setCurrency(c);
+    try { localStorage.setItem('smartsaver-currency', c); } catch { /* ignore */ }
+    toast({ title: t('Money updated') || 'Money updated' });
+  };
+
   return (
     <div className="p-4 space-y-6">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold">Settings</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">Customize your SmartSaver experience</p>
+        <h2 className="text-xl sm:text-2xl font-bold">{t('settings_title')}</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">{t('track_milestones')}</p>
       </div>
 
       {/* Appearance (temporarily hidden) */}
@@ -138,11 +158,11 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="dark-mode" className="text-sm font-medium">
-                  Dark Mode
-                </Label>
-                <p className="text-sm text-muted-foreground">
-                  Switch between light and dark themes
-                </p>
+                      {t('dark_mode')}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {t('dark_mode_desc')}
+                    </p>
               </div>
               <Switch
                 id="dark-mode"
@@ -155,6 +175,39 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
       )}
 
       {/* Notifications */}
+      {/* Language */}
+      <Card className="financial-card">
+        <div className="space-y-4">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            {t('settings_language')}
+          </h3>
+
+          <div className="flex items-center gap-4">
+            <Button variant={language === 'en' ? 'financial' : 'ghost'} onClick={() => handleLanguageChange('en')}>
+              {t('language_en')}
+            </Button>
+            <Button variant={language === 'zh' ? 'financial' : 'ghost'} onClick={() => handleLanguageChange('zh')}>
+              {t('language_zh')}
+            </Button>
+          </div>
+        </div>
+      </Card>
+      <Card className="financial-card">
+        <div className="space-y-4">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            {t('Money Type')}
+          </h3>
+
+          <div className="flex items-center gap-4">
+            <Button variant={currency === 'USD' ? 'financial' : 'ghost'} onClick={() => handleCurrencyChange('USD')}>USD</Button>
+            <Button variant={currency === 'TWD' ? 'financial' : 'ghost'} onClick={() => handleCurrencyChange('TWD')}>TWD</Button>
+            <Button variant={currency === 'EUR' ? 'financial' : 'ghost'} onClick={() => handleCurrencyChange('EUR')}>EUR</Button>
+            <Button variant={currency === 'JPY' ? 'financial' : 'ghost'} onClick={() => handleCurrencyChange('JPY')}>JPY</Button>
+          </div>
+        </div>
+      </Card>
       <Card className="financial-card">
         <div className="space-y-4">
           <h3 className="font-semibold flex items-center gap-2">
@@ -164,12 +217,12 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="notifications" className="text-sm font-medium">
-                Push Notifications
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Get reminders for expense logging and savings goals
-              </p>
+                <Label htmlFor="notifications" className="text-sm font-medium">
+                  {t('notifications_title')}
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                {t('notifications_desc')}
+                </p>
             </div>
             <Switch
               id="notifications"
@@ -193,14 +246,14 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
         <div className="space-y-4">
           <h3 className="font-semibold flex items-center gap-2">
             <Database className="w-5 h-5" />
-            Data Management
+            {t('data_management')}
           </h3>
           
           {/* Data Stats */}
           <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
             <div className="text-center">
               <p className="text-2xl font-bold text-primary">{stats.goals}</p>
-              <p className="text-xs text-muted-foreground">Savings Goals</p>
+              <p className="text-xs text-muted-foreground">{t('savings_goals')}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-secondary">{stats.expenses}</p>
@@ -219,7 +272,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
               onClick={handleExportData}
             >
               <Download className="w-4 h-4 mr-2" />
-              Export Data as Backup
+              {t('export_backup')}
             </Button>
             
             <div className="relative">
@@ -235,9 +288,9 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
                 className="w-full justify-start"
                 asChild
               >
-                <label htmlFor="import-file" className="cursor-pointer">
+                  <label htmlFor="import-file" className="cursor-pointer">
                   <Upload className="w-4 h-4 mr-2" />
-                  Import Backup Data
+                  {t('import_backup')}
                 </label>
               </Button>
             </div>
@@ -274,20 +327,19 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
                   className="w-full justify-start"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Delete All Data
+                  {t('delete_all_data')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-destructive">
                     <AlertTriangle className="w-5 h-5" />
-                    Delete All Data
+                    {t('delete_confirm_title')}
                   </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <p className="text-muted-foreground">
-                    This will permanently delete all your savings goals, expenses, and budgets. 
-                    This action cannot be undone.
+                    {t('delete_confirm_body')}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Consider exporting your data first as a backup.
@@ -330,7 +382,7 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
               onClick={() => navigate('/how-to-use')}
             >
               <BookOpen className="w-4 h-4 mr-2" />
-              How to Use Smart Saver
+              {t('help_support')}
             </Button>
             
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
@@ -348,12 +400,12 @@ export default function SettingsScreen({ onNavigate }: SettingsScreenProps) {
           <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 text-2xl text-white">
             💰
           </div>
-          <h3 className="font-semibold text-lg mb-2">SmartSaver</h3>
+          <h3 className="font-semibold text-lg mb-2">{t('app_title')}</h3>
           <p className="text-muted-foreground text-sm mb-4">
-            Your personal finance companion for smart money management
+            {t('built_with')}
           </p>
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">Version 1.0.0</p>
+            <p className="text-xs text-muted-foreground">{t('version_label')} 1.0.0</p>
             <p className="text-xs text-muted-foreground">
               Built with ❤️ for better financial habits
             </p>

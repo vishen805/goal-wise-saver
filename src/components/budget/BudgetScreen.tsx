@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, PieChart, AlertTriangle, CheckCircle } from 'lucide-react';
 import { budgetsStorage, expensesStorage } from '@/lib/storage';
+import { t } from '@/lib/i18n';
 import { formatCurrency, getCategoryIcon } from '@/lib/categories';
 import { Budget, ExpenseCategory } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
@@ -52,13 +53,12 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
   const handleAddBudget = (formData: FormData) => {
     const category = formData.get('category') as ExpenseCategory;
     const monthlyLimit = parseFloat(formData.get('monthlyLimit') as string);
-    
     // Check if budget already exists for this category and month
     const existingBudget = budgets.find(b => b.category === category);
     if (existingBudget) {
       toast({
-        title: "Budget Already Exists",
-        description: `You already have a budget for ${category} this month.`,
+        title: t('budget_exists_title') || t('add_budget'),
+        description: t('budget_exists_desc', { category: t(category) }) || '',
         variant: "destructive",
       });
       return;
@@ -75,10 +75,10 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
     budgetsStorage.add(newBudget);
     setBudgets(prev => [...prev, newBudget]);
     setIsAddDialogOpen(false);
-    
+
     toast({
-      title: "Budget Created! 💰",
-      description: `${formatCurrency(monthlyLimit)} budget set for ${category}.`,
+      title: t('budget_created_title') || 'Budget Created! 💰',
+      description: t('budget_created_desc', { amount: formatCurrency(monthlyLimit), category: t(category) }) || '',
     });
   };
 
@@ -87,10 +87,9 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
     setBudgets(prev => prev.map(b => 
       b.id === budgetId ? { ...b, monthlyLimit: newLimit } : b
     ));
-    
     toast({
-      title: "Budget Updated! ✏️",
-      description: "Your budget limit has been updated.",
+      title: t('budget_updated_title') || 'Budget Updated! ✏️',
+      description: t('budget_updated_desc') || t('budget_updated') || '',
     });
   };
 
@@ -104,39 +103,37 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
       handleAddBudget(new FormData(e.currentTarget));
     }} className="space-y-4">
       <div>
-        <Label htmlFor="category">Category</Label>
+        <Label htmlFor="category">{t('category_label') || t('category') || 'Category'}</Label>
         <Select name="category" required>
           <SelectTrigger>
-            <SelectValue placeholder="Select a category" />
+            <SelectValue placeholder={t('select_category') || 'Select a category'} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="food">🍽️ Food & Dining</SelectItem>
-            <SelectItem value="transport">🚗 Transport</SelectItem>
-            <SelectItem value="entertainment">🎬 Entertainment</SelectItem>
-            <SelectItem value="shopping">🛍️ Shopping</SelectItem>
-            <SelectItem value="bills">⚡ Bills & Utilities</SelectItem>
-            <SelectItem value="healthcare">🏥 Healthcare</SelectItem>
-            <SelectItem value="education">📚 Education</SelectItem>
-            <SelectItem value="other">📋 Other</SelectItem>
+            <SelectItem value="food">🍽️ {t('food_and_dining') || 'Food & Dining'}</SelectItem>
+            <SelectItem value="transport">🚗 {t('transport') || 'Transport'}</SelectItem>
+            <SelectItem value="entertainment">🎬 {t('entertainment') || 'Entertainment'}</SelectItem>
+            <SelectItem value="shopping">🛍️ {t('shopping') || 'Shopping'}</SelectItem>
+            <SelectItem value="bills">⚡ {t('bills_utilities') || 'Bills & Utilities'}</SelectItem>
+            <SelectItem value="healthcare">🏥 {t('healthcare') || 'Healthcare'}</SelectItem>
+            <SelectItem value="education">📚 {t('education') || 'Education'}</SelectItem>
+            <SelectItem value="other">📋 {t('other') || 'Other'}</SelectItem>
           </SelectContent>
         </Select>
       </div>
-      
       <div>
-        <Label htmlFor="monthlyLimit">Monthly Budget Limit</Label>
+        <Label htmlFor="monthlyLimit">{t('monthly_budget') || 'Monthly Budget Limit'}</Label>
         <Input
           id="monthlyLimit"
           name="monthlyLimit"
           type="number"
           step="0.01"
           min="0"
-          placeholder="0.00"
+          placeholder={t('amount_placeholder') || '0.00'}
           required
         />
       </div>
-      
       <Button type="submit" className="w-full" variant="budget">
-        Create Budget
+        {t('add_budget') || 'Create Budget'}
       </Button>
     </form>
   );
@@ -145,8 +142,8 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Budget Management</h2>
-          <p className="text-muted-foreground">Control your monthly spending</p>
+          <h2 className="text-2xl font-bold">{t('budget_management') || 'Budget Management'}</h2>
+          <p className="text-muted-foreground">{t('control_monthly_spending') || 'Control your monthly spending'}</p>
         </div>
         
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -157,7 +154,7 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Budget</DialogTitle>
+              <DialogTitle>{t('create_new_budget') || 'Create New Budget'}</DialogTitle>
             </DialogHeader>
             <BudgetForm />
           </DialogContent>
@@ -223,13 +220,13 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
       {budgets.length === 0 ? (
         <Card className="financial-card text-center py-12">
           <PieChart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No budgets set</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('no_budgets_set') || 'No budgets set'}</h3>
           <p className="text-muted-foreground mb-6">
-            Create your first budget to start managing your monthly spending!
+            {t('create_first_budget') || 'Create your first budget to start managing your monthly spending!'}
           </p>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="budget">Create Your First Budget</Button>
+              <Button variant="budget">{t('create_first_budget') || 'Create Your First Budget'}</Button>
             </DialogTrigger>
           </Dialog>
         </Card>
@@ -250,9 +247,9 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
                         {categoryIcon.icon}
                       </div>
                       <div>
-                        <h3 className="font-semibold capitalize">{budget.category}</h3>
+                        <h3 className="font-semibold capitalize">{t(budget.category) || budget.category}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {formatCurrency(budget.monthlyLimit)} budget
+                          {formatCurrency(budget.monthlyLimit)} {t('budget')}
                         </p>
                       </div>
                     </div>
@@ -265,7 +262,7 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
                       <p className={`text-sm ${
                         isOverBudget ? 'text-destructive' : 'text-success'
                       }`}>
-                        {isOverBudget ? 'Over by ' : 'Remaining: '}
+                        {isOverBudget ? t('over_by') || 'Over by ' : t('remaining') || 'Remaining: '}
                         {formatCurrency(Math.abs(remaining))}
                       </p>
                     </div>
@@ -273,7 +270,7 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
 
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Progress</span>
+                      <span className="text-sm font-medium">{t('progress_label') || 'Progress'}</span>
                       <span className={`text-sm font-semibold ${
                         isOverBudget ? 'text-destructive' : 
                         percentage >= 80 ? 'text-warning' : 'text-success'
@@ -293,12 +290,12 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const newLimit = prompt("Enter new budget limit:", budget.monthlyLimit.toString());
+                        const newLimit = prompt(t('edit_budget_prompt') || 'Enter new budget limit:', budget.monthlyLimit.toString());
                         if (newLimit) handleUpdateBudget(budget.id, parseFloat(newLimit));
                       }}
                       className="flex-1"
                     >
-                      Edit Budget
+                      {t('edit_budget') || 'Edit Budget'}
                     </Button>
                     {percentage >= 80 && !isOverBudget && (
                       <Button
@@ -306,7 +303,7 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
                         size="sm"
                         className="flex-1"
                       >
-                        Almost There!
+                        {t('almost_there') || 'Almost There!'}
                       </Button>
                     )}
                     {isOverBudget && (
@@ -315,7 +312,7 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
                         size="sm"
                         className="flex-1"
                       >
-                        Over Budget!
+                        {t('over_budget') || 'Over Budget!'}
                       </Button>
                     )}
                   </div>
@@ -334,11 +331,11 @@ export default function BudgetScreen({ onNavigate }: BudgetScreenProps) {
           onClick={() => setIsAddDialogOpen(true)}
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add Budget
+          {t('add_budget') || 'Add Budget'}
         </Button>
         <Button variant="ghost" className="py-6">
           <PieChart className="w-4 h-4 mr-2" />
-          View Reports
+          {t('view_reports') || 'View Reports'}
         </Button>
       </div>
     </div>

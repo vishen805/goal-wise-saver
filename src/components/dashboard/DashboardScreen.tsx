@@ -7,6 +7,7 @@ import { savingsGoalsStorage, expensesStorage, budgetsStorage, incomeStorage } f
 import { formatCurrency, getProgressColor } from '@/lib/categories';
 import { SavingsGoal, Expense, Budget, FinancialSummary } from '@/types/financial';
 import { AIAdviceCard } from '@/components/ai/AIAdviceCard';
+import { t } from '@/lib/i18n';
 import { IncomeInput } from '@/components/income/IncomeInput';
 import { EnhancedAIAdvisorService } from '@/services/enhancedAIAdvisorService';
 
@@ -90,10 +91,10 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
   };
 
   const quickTips = [
-    summary.savingsGoalsProgress >= 80 && "🎉 You're doing great with your savings goals!",
-    summary.budgetRemaining < 100 && "⚠️ You're close to your monthly budget limit",
-    summary.totalSavings > 1000 && "💪 You've built a solid savings foundation!",
-    recentExpenses.length === 0 && "📝 Start tracking your expenses to get insights",
+    summary.savingsGoalsProgress >= 80 && t('tip_savings_great'),
+    summary.budgetRemaining < 100 && t('tip_budget_close'),
+    summary.totalSavings > 1000 && t('tip_savings_foundation'),
+    recentExpenses.length === 0 && t('start_tracking_expenses'),
   ].filter(Boolean);
 
   return (
@@ -101,9 +102,9 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
       {/* Welcome Section */}
       <div className="text-center py-4">
         <h2 className="text-2xl font-bold text-foreground mb-2">
-          Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}! 👋
+          {t('greeting')} 👋
         </h2>
-        <p className="text-muted-foreground">Here's your financial overview</p>
+        <p className="text-muted-foreground">{t('financial_overview')}</p>
       </div>
 
       {/* Income Input */}
@@ -121,7 +122,7 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
         <Card className="financial-card gradient-primary text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/80 text-sm">Total Savings</p>
+                <p className="text-white/80 text-sm">{t('total_savings')}</p>
               <p className="text-2xl font-bold">{formatCurrency(summary.totalSavings)}</p>
             </div>
             <TrendingUp className="w-8 h-8 text-white/80" />
@@ -131,7 +132,7 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
         <Card className="financial-card gradient-secondary text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-white/80 text-sm">This Month</p>
+              <p className="text-white/80 text-sm">{t('this_month')}</p>
               <p className="text-2xl font-bold">{formatCurrency(summary.totalExpenses)}</p>
             </div>
             <TrendingDown className="w-8 h-8 text-white/80" />
@@ -144,7 +145,7 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-primary" />
-            Monthly Budget
+            {t('monthly_budget')}
           </h3>
           <span className={`text-sm font-medium ${
             summary.budgetRemaining >= 0 ? 'text-success' : 'text-destructive'
@@ -157,8 +158,8 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
           className="w-full h-3 mb-2"
         />
         <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Spent: {formatCurrency(summary.totalExpenses)}</span>
-          <span>Budget: {formatCurrency(summary.monthlyBudget)}</span>
+          <span>{t('spent')}: {formatCurrency(summary.totalExpenses)}</span>
+          <span>{t('budget')}: {formatCurrency(summary.monthlyBudget)}</span>
         </div>
       </Card>
 
@@ -167,7 +168,7 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
         <Card className="financial-card">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Target className="w-5 h-5 text-primary" />
-            Savings Goals Progress
+            {t('savings_goals_progress')}
           </h3>
           <div className="space-y-4">
             {activeGoals.map((goal) => {
@@ -195,9 +196,9 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
       {/* Quick Tips */}
       {quickTips.length > 0 && (
         <Card className="financial-card gradient-accent text-white">
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
             <AlertCircle className="w-5 h-5" />
-            Smart Tip
+            {t('smart_tip')}
           </h3>
           <p className="text-sm text-white/90">{quickTips[0]}</p>
         </Card>
@@ -206,7 +207,7 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
       {/* Recent Expenses */}
       {recentExpenses.length > 0 && (
         <Card className="financial-card">
-          <h3 className="font-semibold mb-4">Recent Expenses</h3>
+          <h3 className="font-semibold mb-4">{t('recent_expenses')}</h3>
           <div className="space-y-3">
             {recentExpenses.map((expense) => (
               <div key={expense.id} className="flex items-center justify-between py-2 border-b border-border last:border-b-0">
@@ -236,14 +237,14 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
           className="financial-card gradient-primary text-white border-0 font-semibold py-6"
           onClick={() => onNavigate('expenses')}
         >
-          Add Expense
+          {t('add_expense')}
         </Button>
         <Button 
           variant="outline" 
           className="py-6 font-semibold"
           onClick={() => onNavigate('goals')}
         >
-          New Goal
+          {t('create_new_goal')}
         </Button>
       </div>
     </div>

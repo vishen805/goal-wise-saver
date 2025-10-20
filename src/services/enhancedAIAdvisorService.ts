@@ -1,5 +1,6 @@
 import { Expense, SavingsGoal, Budget, MonthlyIncome, AIAdvice, ExpenseCategory } from '@/types/financial';
-import { expensesStorage, savingsGoalsStorage, budgetsStorage, incomeStorage, aiAdviceStorage } from '@/lib/storage';
+import { expensesStorage, savingsGoalsStorage, budgetsStorage, incomeStorage, aiAdviceStorage, languageStorage } from '@/lib/storage';
+import { t } from '@/lib/i18n';
 
 /**
  * Enhanced AI Advisor Service - provides sophisticated financial analysis and personalized advice
@@ -11,9 +12,14 @@ export class EnhancedAIAdvisorService {
    */
   static async generateAdvice(forceRefresh = false): Promise<AIAdvice[]> {
     const existingAdvice = aiAdviceStorage.getLatest();
-    
+    const cachedLang = aiAdviceStorage.getLang ? aiAdviceStorage.getLang() : undefined;
+    const currentLang = languageStorage.get();
+
+    // If language changed since advice was cached, force refresh
+    const shouldForceRefresh = forceRefresh || (cachedLang && cachedLang !== currentLang);
+
     // Return cached advice if less than 1 hour old and not forcing refresh
-    if (!forceRefresh && existingAdvice.length > 0) {
+    if (!shouldForceRefresh && existingAdvice.length > 0) {
       const latestAdvice = existingAdvice[0];
       const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
       if (new Date(latestAdvice.createdAt) > hourAgo) {
@@ -66,17 +72,22 @@ export class EnhancedAIAdvisorService {
     return [{
       id: Date.now().toString(),
       type: 'budget-optimization',
-      title: 'Welcome to Smart Financial Planning!',
-      message: 'Start by tracking your income and expenses for a few days to get personalized advice.',
+      title: t('welcome_smart_planning_title'),
+      message: t('welcome_smart_planning_msg'),
       impact: { monthlySavings: 0, yearlySavings: 0 },
       priority: 'medium',
       actionItems: [
-        'Add your monthly income',
-        'Track daily expenses for one week',
-        'Set your first savings goal'
+        t('onboarding_action_1'),
+        t('onboarding_action_2'),
+        t('onboarding_action_3')
       ],
       createdAt: new Date().toISOString()
     }];
+  }
+
+  // Simple placeholder formatter for templates like '{key}'
+  private static format(template: string, params: Record<string, string | number> = {}): string {
+    return Object.keys(params).reduce((s, k) => s.split(`{${k}}`).join(String(params[k])), template);
   }
 
   private static analyzeSpendingPatterns(expenses: Expense[], income: number): AIAdvice[] {
@@ -88,7 +99,7 @@ export class EnhancedAIAdvisorService {
     const savingsRate = ((income - monthlyExpenses) / income) * 100;
 
     // Low savings rate advice
-    if (savingsRate < 20) {
+      if (savingsRate < 20) {
       const targetSavings = income * 0.2;
       const currentSavings = income - monthlyExpenses;
       const neededReduction = targetSavings - currentSavings;
@@ -96,18 +107,22 @@ export class EnhancedAIAdvisorService {
       advice.push({
         id: `savings-rate-${Date.now()}`,
         type: 'spending-reduction',
-        title: 'Boost Your Savings Rate',
-        message: `You're currently saving ${savingsRate.toFixed(1)}% of your income. Experts recommend saving at least 20%. You need to reduce spending by $${neededReduction.toFixed(0)} monthly to reach this target.`,
+        title: t('rec_boost_title'),
+        message: this.format(t('rec_boost_msg'), {
+          savings: savingsRate.toFixed(1),
+          target: (20).toString(),
+          needed: `$${neededReduction.toFixed(0)}`
+        }),
         impact: {
           monthlySavings: neededReduction,
           yearlySavings: neededReduction * 12
         },
         priority: savingsRate < 10 ? 'high' : 'medium',
         actionItems: [
-          'Review largest expense categories',
-          'Cancel unused subscriptions',
-          'Cook at home more often',
-          'Set up automatic savings transfers'
+          t('action_review_largest_categories'),
+          t('action_cancel_subscriptions'),
+          t('action_cook_at_home'),
+          t('action_auto_savings')
         ],
         createdAt: new Date().toISOString()
       });
@@ -120,17 +135,20 @@ export class EnhancedAIAdvisorService {
       advice.push({
         id: `spending-spike-${Date.now()}`,
         type: 'spending-reduction',
-        title: 'Spending Increase Alert',
-        message: `Your spending increased by $${increase.toFixed(0)} (${(((monthlyExpenses / previousMonthExpenses) - 1) * 100).toFixed(1)}%) compared to last month. Let's identify what changed.`,
+        title: t('rec_spending_increase_title'),
+        message: this.format(t('rec_spending_increase_msg'), {
+          increase: `$${increase.toFixed(0)}`,
+          percent: (((monthlyExpenses / previousMonthExpenses) - 1) * 100).toFixed(1)
+        }),
         impact: {
           monthlySavings: increase * 0.5,
           yearlySavings: increase * 0.5 * 12
         },
         priority: 'high',
         actionItems: [
-          'Review recent purchases',
-          'Identify one-time vs recurring increases',
-          'Set spending alerts for top categories'
+          t('action_review_recent_purchases'),
+          t('action_identify_one_time'),
+          t('action_set_spending_alerts')
         ],
         createdAt: new Date().toISOString()
       });
@@ -159,8 +177,14 @@ export class EnhancedAIAdvisorService {
         advice.push({
           id: `goal-shortfall-${goal.id}`,
           type: 'goal-timeline',
-          title: `${goal.name} Timeline Risk`,
-          message: `To reach your ${goal.name} goal by ${new Date(goal.deadline).toLocaleDateString()}, you need to save $${requiredMonthlySavings.toFixed(0)}/month. You're currently saving $${currentMonthlySavings.toFixed(0)}/month. You need an additional $${shortfall.toFixed(0)}/month.`,
+          title: this.format(t('rec_goal_timeline_title'), { name: goal.name }),
+          message: this.format(t('rec_goal_timeline_msg'), {
+            name: goal.name,
+            date: new Date(goal.deadline).toLocaleDateString(),
+            required: `$${requiredMonthlySavings.toFixed(0)}`,
+            current: `$${currentMonthlySavings.toFixed(0)}`,
+            shortfall: `$${shortfall.toFixed(0)}`
+          }),
           impact: {
             monthlySavings: shortfall,
             yearlySavings: shortfall * 12,
@@ -168,10 +192,10 @@ export class EnhancedAIAdvisorService {
           },
           priority: monthsRemaining <= 6 ? 'high' : 'medium',
           actionItems: [
-            `Reduce spending by $${shortfall.toFixed(0)}/month`,
-            'Consider extending goal deadline',
-            'Find additional income sources',
-            'Automate savings transfers'
+            this.format(t('action_reduce_shortfall'), { shortfall: `$${shortfall.toFixed(0)}` }),
+            t('action_extend_deadline'),
+            t('action_find_income'),
+            t('action_auto_savings')
           ],
           createdAt: new Date().toISOString()
         });
@@ -183,8 +207,8 @@ export class EnhancedAIAdvisorService {
         advice.push({
           id: `goal-ahead-${goal.id}`,
           type: 'goal-timeline',
-          title: `${goal.name} Ahead of Schedule!`,
-          message: `Great news! You're on track to reach your ${goal.name} goal ${monthsAhead} months early. Consider setting a more ambitious target or starting a new goal.`,
+          title: this.format(t('rec_goal_ahead_title'), { name: goal.name }),
+          message: this.format(t('rec_goal_ahead_msg'), { name: goal.name, monthsAhead: String(monthsAhead) }),
           impact: {
             monthlySavings: 0,
             yearlySavings: 0,
@@ -192,9 +216,9 @@ export class EnhancedAIAdvisorService {
           },
           priority: 'low',
           actionItems: [
-            'Increase goal target amount',
-            'Set a new savings goal',
-            'Consider investing excess savings'
+            t('action_increase_goal_target'),
+            t('action_set_new_goal'),
+            t('action_consider_investing')
           ],
           createdAt: new Date().toISOString()
         });
@@ -223,18 +247,23 @@ export class EnhancedAIAdvisorService {
         advice.push({
           id: `budget-exceeded-${budget.category}`,
           type: 'budget-optimization',
-          title: `${budget.category} Budget Exceeded`,
-          message: `You've overspent in ${budget.category} by $${overBudget.toFixed(0)} this month. Your budget was $${budget.monthlyLimit}, but you spent $${spent.toFixed(0)}.`,
+          title: this.format(t('rec_budget_exceeded_title'), { category: budget.category }),
+          message: this.format(t('rec_budget_exceeded_msg'), {
+            category: budget.category,
+            overBudget: `$${overBudget.toFixed(0)}`,
+            budget: `$${budget.monthlyLimit.toFixed(0)}`,
+            spent: `$${spent.toFixed(0)}`
+          }),
           impact: {
             monthlySavings: overBudget * 0.7,
             yearlySavings: overBudget * 0.7 * 12
           },
           priority: 'high',
           actionItems: [
-            `Set spending alerts at 80% of ${budget.category} budget`,
-            'Review and reduce non-essential purchases',
-            'Look for cheaper alternatives',
-            'Consider increasing budget if necessary'
+            this.format(t('action_budget_set_alerts'), { category: budget.category }),
+            t('action_reduce_nonessential'),
+            t('action_find_cheaper_alternatives'),
+            t('action_consider_increasing_budget')
           ],
           relatedCategory: budget.category,
           createdAt: new Date().toISOString()
@@ -247,17 +276,20 @@ export class EnhancedAIAdvisorService {
       advice.push({
         id: `budget-too-high-${Date.now()}`,
         type: 'budget-optimization',
-        title: 'Budget vs Income Imbalance',
-        message: `Your total budget ($${totalBudget.toFixed(0)}) is ${((totalBudget / income) * 100).toFixed(0)}% of your income. This leaves little room for savings and unexpected expenses.`,
+        title: t('rec_budget_imbalance_title'),
+        message: this.format(t('rec_budget_imbalance_msg'), {
+          total: `$${totalBudget.toFixed(0)}`,
+          percent: ((totalBudget / income) * 100).toFixed(0)
+        }),
         impact: {
           monthlySavings: (totalBudget - income * 0.7),
           yearlySavings: (totalBudget - income * 0.7) * 12
         },
         priority: 'high',
         actionItems: [
-          'Follow 50/30/20 rule: 50% needs, 30% wants, 20% savings',
-          'Reduce budgets in discretionary categories',
-          'Prioritize essential vs non-essential expenses'
+          t('action_follow_50_30_20'),
+          t('action_reduce_discretionary_budgets'),
+          t('action_prioritize_essential')
         ],
         createdAt: new Date().toISOString()
       });
@@ -287,6 +319,18 @@ export class EnhancedAIAdvisorService {
 
     Object.entries(categorySpending).forEach(([category, amount]) => {
       const categoryKey = category as ExpenseCategory;
+      // localize category name for messages
+      const categoryI18nMap: Record<string, string> = {
+        food: 'food_and_dining',
+        transport: 'transport',
+        entertainment: 'entertainment',
+        shopping: 'shopping',
+        bills: 'bills_utilities',
+        healthcare: 'healthcare',
+        education: 'education',
+        other: 'other'
+      };
+      const localizedCategory = t(categoryI18nMap[category] || category);
       const percentage = amount / income;
       const benchmark = categoryBenchmarks[categoryKey];
       
@@ -297,8 +341,14 @@ export class EnhancedAIAdvisorService {
         advice.push({
           id: `category-high-${category}`,
           type: 'category-analysis',
-          title: `High ${category} Spending`,
-          message: `Your ${category} spending ($${amount.toFixed(0)}) is ${((percentage / benchmark - 1) * 100).toFixed(0)}% above typical levels. Reducing by just 30% would save you $${potentialSavings.toFixed(0)} monthly.`,
+      title: this.format(t('rec_category_high_title'), { category: localizedCategory }),
+          message: this.format(t('rec_category_high_msg'), {
+        category: localizedCategory,
+            amount: `$${amount.toFixed(0)}`,
+            percent: ((percentage / benchmark - 1) * 100).toFixed(0),
+            reduction: '30',
+            potential: `$${potentialSavings.toFixed(0)}`
+          }),
           impact: {
             monthlySavings: potentialSavings,
             yearlySavings: potentialSavings * 12

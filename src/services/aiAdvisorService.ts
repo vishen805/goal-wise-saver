@@ -1,6 +1,8 @@
 import { Expense, SavingsGoal, Budget } from '@/types/financial';
-import { expensesStorage, savingsGoalsStorage, budgetsStorage } from '@/lib/storage';
+import { t } from '@/lib/i18n';
+import { expensesStorage, savingsGoalsStorage, budgetsStorage, languageStorage } from '@/lib/storage';
 import { generateTips } from './tipsService';
+import { formatCurrency } from '@/lib/categories';
 
 export interface AIMessage {
   id: string;
@@ -81,6 +83,11 @@ export class AIAdvisorService {
     });
   }
 
+  // Simple placeholder formatter for templates like '{key}'
+  private static format(template: string, params: Record<string, string | number> = {}): string {
+    return Object.keys(params).reduce((s, k) => s.split(`{${k}}`).join(String(params[k])), template);
+  }
+
   /**
    * Generate AI response based on question and user data
    */
@@ -91,7 +98,9 @@ export class AIAdvisorService {
     budgets: Budget[],
     tips: any[]
   ): Promise<string> {
-    const lowerQuestion = question.toLowerCase();
+  const lowerQuestion = question.toLowerCase();
+  const lang = languageStorage.get();
+  const questionToCheck = lang === 'zh' ? question : lowerQuestion;
 
     // Calculate key metrics
     const totalMonthlyExpenses = expenses
@@ -102,23 +111,25 @@ export class AIAdvisorService {
     const achievedGoals = goals.filter(g => g.currentAmount >= g.targetAmount).length;
 
     // Question categorization and responses
-    if (lowerQuestion.includes('save more') || lowerQuestion.includes('increase savings')) {
+    const saveKeys = lang === 'zh' ? ['儲蓄', '多存', '增加儲蓄', '存更多'] : ['save more', 'increase savings', 'save', 'savings'];
+    const budgetKeys = lang === 'zh' ? ['預算', '支出', '花費'] : ['budget', 'spending', 'expense'];
+    const goalKeys = lang === 'zh' ? ['目標', '達成'] : ['goal', 'target'];
+    const categoryKeys = lang === 'zh' ? ['類別', '支出項目'] : ['category', 'expense'];
+    const planKeys = lang === 'zh' ? ['計畫', '策略', '方案'] : ['plan', 'strategy'];
+
+    if (saveKeys.some(k => questionToCheck.includes(k))) {
       return this.generateSavingsAdvice(expenses, goals, tips);
     }
-    
-    if (lowerQuestion.includes('budget') || lowerQuestion.includes('spending')) {
+    if (budgetKeys.some(k => questionToCheck.includes(k))) {
       return this.generateBudgetAdvice(expenses, budgets, totalMonthlyExpenses);
     }
-    
-    if (lowerQuestion.includes('goal') || lowerQuestion.includes('target')) {
+    if (goalKeys.some(k => questionToCheck.includes(k))) {
       return this.generateGoalAdvice(goals, totalMonthlyExpenses);
     }
-    
-    if (lowerQuestion.includes('category') || lowerQuestion.includes('expense')) {
+    if (categoryKeys.some(k => questionToCheck.includes(k))) {
       return this.generateCategoryAdvice(expenses);
     }
-
-    if (lowerQuestion.includes('plan') || lowerQuestion.includes('strategy')) {
+    if (planKeys.some(k => questionToCheck.includes(k))) {
       return this.generatePlanAdvice(expenses, goals, totalMonthlyExpenses);
     }
 
@@ -130,12 +141,16 @@ export class AIAdvisorService {
     const topTip = tips[0];
     const categorySpending = this.getCategorySpending(expenses);
     const highestCategory = Object.entries(categorySpending).sort(([,a], [,b]) => b - a)[0];
+    const category = highestCategory?.[0] || 'highest spending';
+    const amount = highestCategory ? highestCategory[1].toFixed(2) : '0';
+    const potential = highestCategory ? (Number(highestCategory[1]) * 0.1).toFixed(2) : '0';
+    const annual = highestCategory ? (Number(highestCategory[1]) * 0.1 * 12).toFixed(2) : '0';
 
-    return `💰 To save more money, I recommend starting with your ${highestCategory?.[0] || 'highest spending'} category where you spend $${highestCategory?.[1]?.toFixed(2) || '0'} monthly. ${topTip ? topTip.text : 'Consider reducing discretionary spending by 10-15%.'} 
-
-🎯 Based on your current spending patterns, you could potentially save an extra $${(highestCategory?.[1] || 0 * 0.1).toFixed(2)} per month by making small adjustments. This would add up to $${((highestCategory?.[1] || 0) * 0.1 * 12).toFixed(2)} annually!
-
-📈 Start small - even saving $5-10 less per week in your top spending category can make a significant difference over time.`;
+    return [
+      this.format(this.t('ai_savings_intro'), { category, amount, tip: topTip ? topTip.text : this.t('ai_savings_default_tip') }),
+      this.format(this.t('ai_savings_potential'), { potential, annual }),
+      this.t('ai_savings_start_small')
+    ].join('\n\n');
   }
 
   private static generateBudgetAdvice(expenses: Expense[], budgets: Budget[], totalMonthly: number): string {
@@ -144,37 +159,23 @@ export class AIAdvisorService {
 
     if (isOverBudget) {
       const overage = totalMonthly - budgetTotal;
-      return `⚠️ You're currently spending $${overage.toFixed(2)} over your monthly budget of $${budgetTotal.toFixed(2)}.
-
-🔧 Here's how to get back on track:
-• Review your largest expense categories and identify areas to cut back
-• Set up spending alerts when you're 80% through each budget category
-• Consider the 50/30/20 rule: 50% needs, 30% wants, 20% savings
-
-💡 Small daily adjustments can help you save $${(overage / 30).toFixed(2)} per day to stay within budget.`;
+      return this.format(this.t('ai_budget_overage'), {
+        overage: `$${overage.toFixed(2)}`,
+        budgetTotal: `$${budgetTotal.toFixed(2)}`,
+        daily: `$${(overage / 30).toFixed(2)}`
+      });
     }
 
-    return `✅ Great job staying within your $${budgetTotal.toFixed(2)} monthly budget! You're spending $${totalMonthly.toFixed(2)}, leaving you with $${(budgetTotal - totalMonthly).toFixed(2)} extra.
-
-🚀 Consider allocating this surplus to:
-• Emergency fund (aim for 3-6 months of expenses)
-• Retirement savings
-• Your highest priority savings goal
-
-📊 You're showing excellent financial discipline - keep it up!`;
+    return this.format(this.t('ai_budget_within'), {
+      budgetTotal: `$${budgetTotal.toFixed(2)}`,
+      totalMonthly: `$${totalMonthly.toFixed(2)}`,
+      surplus: `$${(budgetTotal - totalMonthly).toFixed(2)}`
+    });
   }
 
   private static generateGoalAdvice(goals: SavingsGoal[], totalMonthly: number): string {
     if (goals.length === 0) {
-      return `🎯 I notice you haven't set any savings goals yet! Setting clear, specific goals is crucial for financial success.
-
-💭 Consider setting goals for:
-• Emergency fund ($${(totalMonthly * 3).toFixed(2)} for 3 months of expenses)
-• Vacation or major purchase
-• Long-term investments
-• Home down payment
-
-📝 Start with one specific, time-bound goal and track your progress monthly.`;
+      return this.format(this.t('ai_goal_none'), { emergency: `$${(totalMonthly * 3).toFixed(2)}` });
     }
 
     const activeGoals = goals.filter(g => g.currentAmount < g.targetAmount);
@@ -183,20 +184,17 @@ export class AIAdvisorService {
     if (activeGoals.length > 0) {
       const monthsToGoal = Math.ceil(totalNeeded / (totalMonthly * 0.2)); // Assuming 20% savings rate
       
-      return `🎯 You have ${activeGoals.length} active savings goal${activeGoals.length > 1 ? 's' : ''} totaling $${totalNeeded.toFixed(2)}.
-
-⏰ At a 20% savings rate ($${(totalMonthly * 0.2).toFixed(2)}/month), you could achieve all goals in approximately ${monthsToGoal} months.
-
-🚀 To reach your goals faster:
-• Increase your savings rate to 25-30%
-• Focus on one goal at a time for faster momentum
-• Automate transfers to your savings account
-• Celebrate milestones at 25%, 50%, and 75% completion
-
-💪 You're ${((goals.reduce((sum, g) => sum + g.currentAmount, 0) / goals.reduce((sum, g) => sum + g.targetAmount, 0)) * 100).toFixed(1)}% of the way there!`;
+      const pct = ((goals.reduce((sum, g) => sum + g.currentAmount, 0) / goals.reduce((sum, g) => sum + g.targetAmount, 0)) * 100).toFixed(1);
+      return this.format(this.t('ai_goal_active'), {
+        count: String(activeGoals.length),
+        totalNeeded: `$${totalNeeded.toFixed(2)}`,
+        monthlySavings: `$${(totalMonthly * 0.2).toFixed(2)}`,
+        monthsToGoal: String(monthsToGoal),
+        pct
+      });
     }
 
-    return `🎉 Congratulations! You've achieved all your savings goals. Time to set new, bigger targets to continue your financial growth!`;
+    return this.t('ai_goal_completed');
   }
 
   private static generateCategoryAdvice(expenses: Expense[]): string {
@@ -204,47 +202,32 @@ export class AIAdvisorService {
     const sortedCategories = Object.entries(categorySpending).sort(([,a], [,b]) => b - a);
     
     if (sortedCategories.length === 0) {
-      return `📊 I don't see any expense data yet. Start tracking your expenses to get personalized category advice!`;
+      return this.t('ai_category_no_data');
     }
 
     const top3 = sortedCategories.slice(0, 3);
-    
-    return `📈 Your top spending categories this month:
+    const topList = top3.map(([category, amount], index) => `${index + 1}. ${category}: $${amount.toFixed(2)}`).join('\n');
+    const tips = [
+      `• ${top3[0]?.[0]}: ${this.t('ai_cat_tip_1')}`,
+      `• ${top3[1]?.[0]}: ${this.t('ai_cat_tip_2')}`,
+      `• ${top3[2]?.[0]}: ${this.t('ai_cat_tip_3')}`
+    ].join('\n');
 
-${top3.map(([category, amount], index) => 
-  `${index + 1}. ${category}: $${amount.toFixed(2)}`
-).join('\n')}
-
-💡 Category optimization tips:
-• ${top3[0]?.[0]}: Look for alternatives or negotiate better rates
-• ${top3[1]?.[0]}: Set a weekly spending limit to stay conscious
-• ${top3[2]?.[0]}: Track each transaction to identify patterns
-
-🎯 Focus on reducing your top category by 10% first - that's $${(top3[0]?.[1] * 0.1 || 0).toFixed(2)} in monthly savings!`;
+    return this.format(this.t('ai_category_summary'), {
+      topList,
+      tips,
+      savings: `$${((top3[0]?.[1] || 0) * 0.1).toFixed(2)}`
+    });
   }
 
   private static generatePlanAdvice(expenses: Expense[], goals: SavingsGoal[], totalMonthly: number): string {
     const hasGoals = goals.length > 0;
     const totalGoalAmount = goals.reduce((sum, g) => sum + g.targetAmount, 0);
-    
-    return `📋 Here's your personalized savings plan strategy:
-
-🎯 **Monthly Savings Target**: $${(totalMonthly * 0.2).toFixed(2)} (20% of expenses)
-
-📊 **Priority Order**:
-1. Emergency Fund: $${(totalMonthly * 3).toFixed(2)} (3 months expenses)
-2. ${hasGoals ? `Your Goals: $${totalGoalAmount.toFixed(2)}` : 'Set specific savings goals'}
-3. Long-term investments (retirement, index funds)
-
-⚡ **Quick Wins**:
-• Automate savings transfers on payday
-• Use the 24-hour rule for purchases over $50
-• Review and cancel unused subscriptions monthly
-• Cook at home 1-2 extra times per week
-
-🔄 **Monthly Review**: Track progress and adjust strategy based on what's working best for you.
-
-Remember: The best savings plan is one you can stick to consistently! Start small and build momentum.`;
+    return this.format(this.t('ai_plan_intro'), {
+      monthlyTarget: `$${(totalMonthly * 0.2).toFixed(2)}`,
+      emergency: `$${(totalMonthly * 3).toFixed(2)}`,
+      yourGoals: hasGoals ? `$${totalGoalAmount.toFixed(2)}` : this.t('ai_plan_no_goals')
+    });
   }
 
   private static generateGeneralAdvice(
@@ -255,39 +238,33 @@ Remember: The best savings plan is one you can stick to consistently! Start smal
     achievedGoals: number
   ): string {
     const hasData = expenses.length > 0;
-    
+
     if (!hasData) {
-      return `👋 Welcome to your AI Financial Advisor! I'm here to help you create and optimize your saving strategy.
-
-🚀 To get started:
-1. Track your expenses for a few days
-2. Set up your first savings goal
-3. Create a monthly budget
-4. Ask me specific questions about your finances
-
-💬 Try asking me things like:
-• "How can I save more money?"
-• "Am I staying within my budget?"
-• "What's the best strategy for my goals?"
-
-I'll analyze your financial data and provide personalized advice to help you achieve financial success! 💪`;
+      return [
+        '👋 ' + t('ai_welcome'),
+        '',
+        '🚀 ' + t('welcome_smart_planning_msg'),
+        '',
+        '💬 ' + t('try_asking'),
+        `• ${t('suggested_q_1')}`,
+        `• ${t('suggested_q_2')}`,
+        `• ${t('suggested_q_3')}`,
+        '',
+        t('welcome_smart_planning_msg')
+      ].join('\n');
     }
 
-    return `📊 **Financial Health Overview**
+    return this.format(this.t('ai_general_overview'), {
+      totalMonthly: `$${totalMonthly.toFixed(2)}`,
+      goalsCount: String(goals.length),
+      achievedGoals: String(achievedGoals),
+      budgetsCount: String(budgets.length),
+      emergency: `$${(totalMonthly * 3).toFixed(2)}`
+    });
+  }
 
-💰 Monthly Spending: $${totalMonthly.toFixed(2)}
-🎯 Savings Goals: ${goals.length} (${achievedGoals} completed)
-📋 Active Budgets: ${budgets.length}
-
-${achievedGoals > 0 ? `🎉 Congratulations on achieving ${achievedGoals} goal${achievedGoals > 1 ? 's' : ''}!` : ''}
-
-💡 **Key Recommendations**:
-• Maintain emergency fund of $${(totalMonthly * 3).toFixed(2)}
-• Save 20-30% of income when possible
-• Review spending monthly and adjust as needed
-• Celebrate your financial wins, no matter how small!
-
-Ask me anything specific about your finances, and I'll provide detailed advice based on your data! 🤝`;
+  private static t(key: string) {
+    return t(key);
   }
 
   private static getCategorySpending(expenses: Expense[]): Record<string, number> {

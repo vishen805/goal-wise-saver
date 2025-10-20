@@ -7,6 +7,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AIAdvisorService, AIMessage } from '@/services/aiAdvisorService';
 import { Bot, Send, User, Trash2, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { t } from '@/lib/i18n';
+import { expensesStorage } from '@/lib/storage';
+import { ExpensePieChart } from '@/components/charts/ExpensePieChart';
 
 interface AIAdvisorScreenProps {
   onNavigate: (screen: string, title?: string) => void;
@@ -23,7 +26,12 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
     // Load existing conversation
     const existingMessages = AIAdvisorService.getConversation();
     setMessages(existingMessages);
+    // Load expenses for pie chart
+    const allExpenses = expensesStorage.get();
+    setExpenses(allExpenses);
   }, []);
+
+  const [expenses, setExpenses] = useState<any[]>([]);
 
   useEffect(() => {
     // Scroll to bottom when new messages arrive
@@ -53,8 +61,8 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
     } catch (error) {
       console.error('Error getting AI response:', error);
       toast({
-        title: "Error",
-        description: "Failed to get AI response. Please try again.",
+        title: t('error_ai_response'),
+        description: t('error_ai_response_desc'),
         variant: "destructive",
       });
     } finally {
@@ -73,8 +81,8 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
     AIAdvisorService.clearConversation();
     setMessages([]);
     toast({
-      title: "Conversation cleared",
-      description: "Your chat history has been cleared.",
+      title: t('conversation_cleared_title'),
+      description: t('conversation_cleared_desc'),
     });
   };
 
@@ -83,11 +91,11 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
   };
 
   const suggestedQuestions = [
-    "How can I save more money each month?",
-    "Am I staying within my budget?",
-    "What's my best savings strategy?",
-    "How can I reach my financial goals faster?",
-    "Which expenses should I cut back on?"
+    t('suggested_q_1'),
+    t('suggested_q_2'),
+    t('suggested_q_3'),
+    t('suggested_q_4'),
+    t('suggested_q_5')
   ];
 
   return (
@@ -99,8 +107,8 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
             <Sparkles className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">AI Financial Advisor</h1>
-            <p className="text-sm text-muted-foreground">Get personalized savings advice</p>
+            <h1 className="text-lg font-semibold text-foreground">{t('ai_advisor_title')}</h1>
+            <p className="text-sm text-muted-foreground">{t('ai_advisor_desc')}</p>
           </div>
         </div>
         
@@ -126,15 +134,15 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
               </div>
               
               <div className="space-y-2">
-                <h3 className="text-lg font-medium text-foreground">Welcome to your AI Financial Advisor!</h3>
+                <h3 className="text-lg font-medium text-foreground">{t('ai_welcome')}</h3>
                 <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                  Ask me anything about your savings plan, budget, or financial goals. I'll analyze your data and provide personalized advice.
+                  {t('ai_welcome_desc')}
                 </p>
               </div>
 
               <div className="space-y-3">
-                <p className="text-sm font-medium text-foreground">Try asking:</p>
-                <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">{t('try_asking')}</p>
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                   {suggestedQuestions.map((question, index) => (
                     <Button
                       key={index}
@@ -143,11 +151,17 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
                       className="w-full text-left justify-start h-auto py-2 px-3 text-sm"
                       onClick={() => setInputValue(question)}
                     >
-                      "{question}"
+                      {question}
                     </Button>
                   ))}
                 </div>
               </div>
+              {/* Show expense pie chart when there are expenses */}
+              {expenses.length > 0 && (
+                <div className="mt-4">
+                  <ExpensePieChart expenses={expenses} title={t('view_all_insights')} />
+                </div>
+              )}
             </div>
           ) : (
             messages.map((message) => (
@@ -194,7 +208,7 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                       </div>
-                      AI is thinking...
+                      {t('ai_is_thinking') || 'AI is thinking...'}
                     </div>
                   </CardContent>
                 </Card>
@@ -207,12 +221,12 @@ const AIAdvisorScreen: React.FC<AIAdvisorScreenProps> = ({ onNavigate }) => {
       {/* Input */}
       <div className="p-4 border-t bg-card">
         <div className="flex gap-2">
-          <Input
+            <Input
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about your saving plan..."
+            placeholder={t('input_placeholder')}
             className="flex-1"
             disabled={isLoading}
           />
